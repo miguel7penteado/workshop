@@ -1,48 +1,59 @@
-# workshop de Data Science - USP
-#### Miguel Suarez Xavier Penteado
-## 2019/09/11
+---
+title: ""
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
 
-## - Manh√£:
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-## - Tarde: M√£o na Massa
-### Perparo inicial:
-+ 0-preparar fun√ß√µes de apoio
-+ 1-Setar todas as vari√°veis de ambiente para que o R, QGIS e Python conversem entre s√≠ pela linha de comando.
+```{r knitr_init, echo=FALSE, cache=FALSE}
+if(!require(rmdformats))
+{
+  install.packages("rmdformats")
+}
+library(rmdformats)
 
-### Engenharia de Dados:
-#### Etapas fora do Banco
-+ 1-Obter endere√ßos das fontes de dados para baixar arquivos com o `curl`
-+ 2-Fazer o Download dos arquivos originais
-+ 3-Descompactar os arquivos
-+ 4-Organizar arquivos descompactados
-+ 5-Corre√ß√µes de codifica√ß√£o e valores faltantes, se poss√≠vel
-+ 6-Cria√ß√£o do Banco de Dados
-+ 7-Importar arquivos para o Banco de Dados
-#### Etapas dentro do Banco
-+ 1-Corrigir caixa dos dados - tudo minusculo
-+ 2-Corrigir tipagem dos dados
-+ 3-Remover dados duplicados, se poss√≠vel
-+ 4-Identificar a chave prim√°ria - Unidades da popula√ß√£o em cada caso
-+ 5-Conectar o dataset estat√≠stico ao geogr√°fico 
+library(knitr)
+library(rmdformats)
 
-## - An√°lise explorat√≥ria:
-+ Problema 1 - Estimar a popula√ß√£o de Botucatu em 2010
-+ Problema 2 - Descobrir a quais municipios com menos de 12.000 habitantes est√£o a menos de 100KM de uma unidade de conserva√ß√£o
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=FALSE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
 
-===========================================================
+## 0- Obtendo e instalando os `pacotes` da plataforma `R`
+Uma vez que vamos interagir com 
 
-Antes de importar qualquer banco de dados voc√™ deve, 
-inicialmente, criar uma estrutura de Banco de Dados para receber os 
-dados do `R` e do `QGIS`
+ - **QGIS**; 
+ - plataforma **python** do QGIS instalada;
+ - SGBD **Postgres**;
 
-### Perparo inicial:
+convÈm instalar alguns pacotes para interagir com estas plataformas atravÈs do `R`
 
-+ 0-preparar fun√ß√µes de apoio
+| **Programa** | **FunÁ„o** | **Plataforma** |
+|:-----------------------------:|:-----------------------------:|:--------------:|
+| `devtools` | `instalador` | `R` |
+| `crayon` | `Formatador saÌda console` | `R` |
+| curl | Downloads | Nativo |
+| pip | instalador | Python |
+| pyunpack, patool, entrypoint2 | Descompactar arquivos | Python |
+| csvkit | tratamento de arquivos CSV | Python |
 
 ```{r 0-descobrindo, results=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.cap ='Instala pacotes R...'}
-#r 0-descobrindo qual o sistema operacional, include=TRUE, message=FALSE, echo=TRUE, results="hide", eval=TRUE, fig.cap ="Instala pacotes R..."
+#r 0-descobrindo qual o sistema operacional, include=TRUE, message=FALSE, echo=TRUE, results="hide", eval=FALSE, fig.cap ="Instala pacotes R..."
 
-Sys.setenv(MINHA_SENHA="minha_senha")
+Sys.setenv(MINHA_SENHA="minha-senha")
 
 
 
@@ -84,7 +95,13 @@ plataforma <- function()
 plataforma()
 
 ```
-+ 1-Setar todas as vari√°veis de ambiente para que o R, QGIS e Python conversem entre s√≠ pela linha de comando.
+
+## 1- definindo variavies de ambiente
+Para obter os arquivos do IBGE e do MMA dos sites correlatos, devemos fazer-lo de forma mais transparente possÌvel ‡ plataforma. No linux, por padr„o, possuÌmos o aplicativo `curl` que ira atender a este requisito.
+No caso do windows por outro lado, o aplicativo `curl`, bem como uma instalaÁ„o **python** e outras ferramentas ser„o disponibilizados pela propria instalaÁ„o do **QGIS**. 
+Para tanto devemos ajustar as **Variaveis de ambiente** para que o RStudio possa utilizar os softwares auxiliares do QGIS, inclusive o python do QGIS.
+
+
 
 ```{r 1-definindo_variaveis_ambiente, results=FALSE, warning=FALSE, message=FALSE, eval=TRUE, fig.cap ='Instala pacotes R...'  }
 sistema <- plataforma()
@@ -174,7 +191,6 @@ system("cmd /c cls")
 ##############################################################################################################
 linux={
   Sys.setenv(TMP="/tmp")
-  system("# apt-get install libproj-dev libgdal-dev")
   
 },
 ##############################################################################################################
@@ -187,11 +203,66 @@ osx={
 
 ```
 
-### Engenharia de Dados:
-#### Etapas fora do Banco
-+ 1-Obter endere√ßos das fontes de dados para baixar arquivos com o `curl`
+## 2- Instalando pacotes `python`
+Para obter os arquivos do IBGE e do MMA dos sites correlatos, devemos fazer-lo de forma mais transparente possÌvel ‡ plataforma. 
 
-```{r definindo_endereco_arquivos_a_baixar, results=FALSE, warning=FALSE, message=FALSE, eval=FALSE, fig.cap ='Definindo o endere√ßo de todos os arquivos'}
+| **Programa** | **FunÁ„o** | **Plataforma** |
+|:-------------------------------:|:----------------------------:|:--------------:|
+| devtools | instalador | R |
+| crayon | Formatador  saÌda console | R |
+| curl | Downloads | Nativo |
+| `pip` | `instalador` | `Python` |
+| `pyunpack, patool, entrypoint2` | `Descompactar arquivos` | `Python` |
+| `csvkit` | `tratamento de arquivos CSV` | `Python` |
+
+
+```{r baixando_pacotes_necessarios,  results=FALSE, warning=FALSE, message=FALSE, eval=FALSE, fig.cap ='Descompactadores...'}
+sistema <- plataforma()
+
+switch(sistema,
+##############################################################################################################
+#CoDIGO ABAIXO So RODA NO WINDOWS
+##############################################################################################################       
+windows={
+
+cat(yellow("Obtendo o PIP for windows... "),"\n")
+system("cmd /c curl https://bootstrap.pypa.io/get-pip.py --progress-bar -o %tmp%\\get-pip.py ")
+
+cat(yellow("Instalando o PIP for windows... "),"\n")
+system("cmd /c python  %tmp%\\get-pip.py ")
+
+cat(yellow("Fazendo o python instalar os modulos descompactadores com PIP... "),"\n")
+system("cmd /c python -m pip install -U --user pyunpack patool entrypoint2")
+  
+},
+##############################################################################################################
+#CoDIGO ABAIXO So RODA NO LINUX
+##############################################################################################################       
+linux={
+
+system("echo  $MINHA_SENHA|sudo -S apt-get install -y python-pip")
+system("echo  $MINHA_SENHA|sudo -S apt-get install -y python3-pip")
+system("echo  $MINHA_SENHA|sudo -S apt-get install -y unzip unrar p7zip-full")
+
+cat(yellow("Fazendo o python instalar os modulos descompactadores com PIP... "),"\n")
+system("echo  $MINHA_SENHA|sudo -S pip install -U --user pyunpack patool entrypoint2")
+  
+},
+##############################################################################################################
+#CoDIGO ABAIXO So RODA NO MAC
+##############################################################################################################       
+osx={
+  
+}
+)
+
+
+```
+
+## 3-Obtendo os arquivos agregados por setor do site do IBGE
+
+
+```{r definindo_endereco_arquivos_a_baixar, results=FALSE, warning=FALSE, message=FALSE, eval=FALSE, fig.cap ='Definindo o endereÁo de todos os arquivos'}
 
 Sys.setenv(AGREGADOS_POR_SETOR_CENSO2010="ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/{1_Atualizacoes_20171016.txt,AC_20171016.zip,AL_20171016.zip,AM_20171016.zip,AP_20171016.zip,BA_20171016.zip,CE_20171016.zip,DF_20171016.zip,Documentacao_Agregado_dos_Setores_20180416.zip,ES_20171016.zip,GO_20171016.zip,MA_20171016.zip,MG_20171016.zip,MS_20171016.zip,MT_20171016.zip,PA_20171016.zip,PB_20171016.zip,PE_20171016.zip,PI_20171016.zip,PR_20171016.zip,RJ_20171016.zip,RN_20171016.zip,RO_20171016.zip,RR_20171016.zip,RS_20171016.zip,SC_20171016.zip,SE_20171016.zip,SP_Capital_20190823.zip,SP_Exceto_a_Capital_20190207.zip,TO_20171016.zip}")
 
@@ -212,7 +283,9 @@ Sys.setenv(IBGE_MALHA_AREA_PONDERACAO_2010="ftp://geoftp.ibge.gov.br/recortes_pa
 Sys.setenv(MMA_CNUC_2019="http://mapas.mma.gov.br/ms_tmp/{FslKXcNaOvxaGJLVXyPOdownload.map,ucstodas.shp,ucstodas.shx,ucstodas.dbf}")
 
 ```
-+ 2-Fazer o Download dos arquivos originais
+
+Uma vez que definimos quais arquivos de microdados queremos obter, vamos fazer o download oficial dos mesmos atravÈs dos sites dos org„os governamentais.
+
 ```{r 2-baixando_arquivos_site_ibge, results=FALSE, warning=FALSE, message=FALSE, eval=FALSE, fig.cap ='Obtendo arquivos agregados por setor e microdados da amostra'}
 
 sistema <- plataforma()
@@ -493,7 +566,7 @@ normalizePath(getwd())
 )
 ```
 
-+ 3-Descompactar os arquivos
+descompactando com python
 
 ```{r descompactando_arquivos_python, include=FALSE, eval=FALSE}
 sistema <- plataforma()
@@ -622,7 +695,9 @@ system(descompacta_todos_arquivos)
 )
 
 ```
-+ 4-Organizar arquivos descompactados
+
+
+
 ```{r congrega_arquivos_agregados_por_setor, include=FALSE, eval = FALSE}
 sistema <- plataforma()
 
@@ -774,336 +849,6 @@ osx={
 }
 )
 ```
-
-+ 5-Corre√ß√µes de codifica√ß√£o e valores faltantes, se poss√≠vel (LINUX)
-
-```bash
-
-#sudo apt-get update
-#sudo apt-get -y install iconv rename curl
-
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-echo -e "\033[1;93m|'Removendo espa√ßo em branco do nome dos arquivos e diret√≥rios...'\033[0m" 
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-find ./ -name "*" -type d -printf "%f\n" -exec rename -f 's/ /_/g' -- {} +
-find ./ -name "*" -type f -printf "%f\n" -exec rename -f 's/ /_/g' -- {} +
-find ./ -name "*" -type d -printf "%f\n" -exec rename -f 's/ /_/g' -- {} +
-find ./ -name "*" -type f -printf "%f\n" -exec rename -f 's/ /_/g' -- {} +
-find ./ -name "*" -type d -printf "%f\n" -exec rename -f -d 's/ /_/g' -- {} +
-find ./ -name "*" -type f -printf "%f\n" -exec rename -f -d 's/ /_/g' -- {} +
-
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-echo -e "\033[1;93m|'Arrumando nomenclatura de arquivos e diret√≥rios de iso-8859-1 para UTF-8 ...'\033[0m" 
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-convmv -r -f iso-8859-1 -t utf-8 --notest *
-convmv -r -f iso-8859-1 -t utf-8 --notest *
-
-
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-echo -e "\033[1;93m|'Renomeando todos os arquivos para minusculo...'\033[0m" 
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-find ./ -type f -name '*' -printf "%f\n" -exec rename -d -f 'y/A-Z/a-z/' {} \;
-convmv -r --lower --notest -f utf-8 * 
-
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-echo -e "\033[1;93m|'Salvando arquivos texto CSV em codifica√ß√£o ISO-8859-1...'\033[0m" 
-echo -e "\033[1;94m'+=====================================================================+'\033[0m" 
-mkdir -p /tmp/ibge_agredados_por_setor/csv
-find . -type f -name *.csv -printf "%f\n" -exec iconv -f iso-8859-1 -t utf-8 {} > /tmp/ibge_agredados_por_setor/csv/ \;
-
-```
-
-+ 6-Cria√ß√£o do Banco de Dados
-  o- Voc√™ deve criar primeiro um usu√°rio
-
-```SQL
-	CREATE ROLE "administrador-banco" LOGIN
-	ENCRYPTED PASSWORD 'md51e565a9f3186879158f90e8a2f194978'
-	SUPERUSER INHERIT CREATEDB CREATEROLE REPLICATION;
-	COMMENT ON ROLE "administrador-banco" IS 'Administrador do Banco de Dados Abertos.';
-```
-  o- Agora voc√™ deve criar o Banco de Dados no PostgreSQL
-
-```SQL
-
--- DROP DATABASE "censo2010-ibge-microdados-site";
-
-CREATE DATABASE "censo2010-ibge-microdados-site"
-  WITH OWNER = "administrador-banco"
-       ENCODING = 'UTF8'
-       TABLESPACE = pg_default
-       LC_COLLATE = 'pt_BR.UTF-8'
-       LC_CTYPE = 'pt_BR.UTF-8'
-       CONNECTION LIMIT = -1;
-```
-  o- Crie um esquema para receber todos os estados
-```SQL
-
-DROP SCHEMA IF EXISTS "microdados.agregados.setor.censo2010";
-
-CREATE SCHEMA "microdados.agregados.setor.censo2010"
-  AUTHORIZATION "administrador-banco";
-
-DO
-$criacao_esquemas_agregados_setor$
-DECLARE
- estado   varchar[] := '{}';
- contador integer; 
-BEGIN 
-	estado[0]  := 'ac';    -- Acre
-	estado[1]  := 'al';    -- Alagoas
-	estado[2]  := 'ap';    -- Amapa
-	estado[3]  := 'am';    -- amazonas
-	estado[4]  := 'ba';    -- Bahia
-	estado[5]  := 'ce';    -- Ceara
-	estado[6]  := 'df';    -- Distrito Federal
-	estado[7]  := 'es';    -- Esp√≠rito Santo
-	estado[8]  := 'go';    -- Goias
-	estado[9]  := 'ma';    -- Maranhao
-	estado[10] := 'mt';    -- Mato Grosso
-	estado[11] := 'ms';    -- Mato Grosso do Sul
-	estado[12] := 'mg';    -- Minas Gerais
-	estado[13] := 'pa';    -- Para 
-	estado[14] := 'pb';    -- Paraiba
-	estado[15] := 'pe';    -- Pernambuco
-	estado[16] := 'pi';    -- Piaui
-	estado[17] := 'pr';    -- Parana
-	estado[18] := 'rj';    -- Rio de Janeiro
-	estado[19] := 'rn';    -- Rio Grande do Norte
-	estado[20] := 'rs';    -- Rio Grande do Sul
-	estado[21] := 'ro';    -- Rondonia
-	estado[22] := 'rr';    -- Roraima
-	estado[23] := 'sc';    -- Santa Catarina
-	estado[24] := 'sp';    -- Sao Paulo
-	estado[25] := 'se';    -- Sergipe
-	estado[26] := 'to';    -- Tocantins
- 
-   FOR contador IN 0..26 LOOP
-      execute 'DROP SCHEMA IF EXISTS "microdados.agregados.setor.censo2010.'|| estado[contador] ||'" ';
-      execute 'CREATE SCHEMA "microdados.agregados.setor.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
-      --Raise Notice estado ;
-   END LOOP;
-END
-$criacao_esquemas_agregados_setor$
-;
-
-
-DROP SCHEMA IF EXISTS "microdados.amostra.domicilios.censo2010";
-
-CREATE SCHEMA "microdados.amostra.domicilios.censo2010"
-  AUTHORIZATION "administrador-banco";
-
-DO
-$criacao_esquemas_estados_domicilios$
-DECLARE
- estado   varchar[] := '{}';
- contador integer; 
-BEGIN 
-	estado[0]  := 'ac';    -- Acre
-	estado[1]  := 'al';    -- Alagoas
-	estado[2]  := 'ap';    -- Amapa
-	estado[3]  := 'am';    -- amazonas
-	estado[4]  := 'ba';    -- Bahia
-	estado[5]  := 'ce';    -- Ceara
-	estado[6]  := 'df';    -- Distrito Federal
-	estado[7]  := 'es';    -- Esp√≠rito Santo
-	estado[8]  := 'go';    -- Goias
-	estado[9]  := 'ma';    -- Maranhao
-	estado[10] := 'mt';    -- Mato Grosso
-	estado[11] := 'ms';    -- Mato Grosso do Sul
-	estado[12] := 'mg';    -- Minas Gerais
-	estado[13] := 'pa';    -- Para 
-	estado[14] := 'pb';    -- Paraiba
-	estado[15] := 'pe';    -- Pernambuco
-	estado[16] := 'pi';    -- Piaui
-	estado[17] := 'pr';    -- Parana
-	estado[18] := 'rj';    -- Rio de Janeiro
-	estado[19] := 'rn';    -- Rio Grande do Norte
-	estado[20] := 'rs';    -- Rio Grande do Sul
-	estado[21] := 'ro';    -- Rondonia
-	estado[22] := 'rr';    -- Roraima
-	estado[23] := 'sc';    -- Santa Catarina
-	estado[24] := 'sp';    -- Sao Paulo
-	estado[25] := 'se';    -- Sergipe
-	estado[26] := 'to';    -- Tocantins
- 
-   FOR contador IN 0..26 LOOP
-      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.domicilios.censo2010.'|| estado[contador] ||'" ';
-      execute 'CREATE SCHEMA "microdados.amostra.domicilios.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
-      --Raise Notice estado ;
-   END LOOP;
-END
-$criacao_esquemas_estados_domicilios$
-;
-
-DROP SCHEMA IF EXISTS "microdados.amostra.emigracao-internacional.censo2010";
-
-CREATE SCHEMA "microdados.amostra.emigracao-internacional.censo2010"
-  AUTHORIZATION "administrador-banco";
-
-DO
-$criacao_esquemas_estados_emigracao_internacional$
-DECLARE
- estado   varchar[] := '{}';
- contador integer; 
-BEGIN 
-	estado[0]  := 'ac';    -- Acre
-	estado[1]  := 'al';    -- Alagoas
-	estado[2]  := 'ap';    -- Amapa
-	estado[3]  := 'am';    -- amazonas
-	estado[4]  := 'ba';    -- Bahia
-	estado[5]  := 'ce';    -- Ceara
-	estado[6]  := 'df';    -- Distrito Federal
-	estado[7]  := 'es';    -- Esp√≠rito Santo
-	estado[8]  := 'go';    -- Goias
-	estado[9]  := 'ma';    -- Maranhao
-	estado[10] := 'mt';    -- Mato Grosso
-	estado[11] := 'ms';    -- Mato Grosso do Sul
-	estado[12] := 'mg';    -- Minas Gerais
-	estado[13] := 'pa';    -- Para 
-	estado[14] := 'pb';    -- Paraiba
-	estado[15] := 'pe';    -- Pernambuco
-	estado[16] := 'pi';    -- Piaui
-	estado[17] := 'pr';    -- Parana
-	estado[18] := 'rj';    -- Rio de Janeiro
-	estado[19] := 'rn';    -- Rio Grande do Norte
-	estado[20] := 'rs';    -- Rio Grande do Sul
-	estado[21] := 'ro';    -- Rondonia
-	estado[22] := 'rr';    -- Roraima
-	estado[23] := 'sc';    -- Santa Catarina
-	estado[24] := 'sp';    -- Sao Paulo
-	estado[25] := 'se';    -- Sergipe
-	estado[26] := 'to';    -- Tocantins
- 
-   FOR contador IN 0..26 LOOP
-      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.emigracao-internacional.censo2010.'|| estado[contador] ||'" ';
-      execute 'CREATE SCHEMA "microdados.amostra.emigracao-internacional.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
-      --Raise Notice estado ;
-   END LOOP;
-END
-$criacao_esquemas_estados_emigracao_internacional$
-;
-
-DROP SCHEMA IF EXISTS "microdados.amostra.mortalidade.censo2010";
-
-CREATE SCHEMA "microdados.amostra.mortalidade.censo2010"
-  AUTHORIZATION "administrador-banco";
-
-DO
-$criacao_esquemas_estados_mortalidadel$
-DECLARE
- estado   varchar[] := '{}';
- contador integer; 
-BEGIN 
-	estado[0]  := 'ac';    -- Acre
-	estado[1]  := 'al';    -- Alagoas
-	estado[2]  := 'ap';    -- Amapa
-	estado[3]  := 'am';    -- amazonas
-	estado[4]  := 'ba';    -- Bahia
-	estado[5]  := 'ce';    -- Ceara
-	estado[6]  := 'df';    -- Distrito Federal
-	estado[7]  := 'es';    -- Esp√≠rito Santo
-	estado[8]  := 'go';    -- Goias
-	estado[9]  := 'ma';    -- Maranhao
-	estado[10] := 'mt';    -- Mato Grosso
-	estado[11] := 'ms';    -- Mato Grosso do Sul
-	estado[12] := 'mg';    -- Minas Gerais
-	estado[13] := 'pa';    -- Para 
-	estado[14] := 'pb';    -- Paraiba
-	estado[15] := 'pe';    -- Pernambuco
-	estado[16] := 'pi';    -- Piaui
-	estado[17] := 'pr';    -- Parana
-	estado[18] := 'rj';    -- Rio de Janeiro
-	estado[19] := 'rn';    -- Rio Grande do Norte
-	estado[20] := 'rs';    -- Rio Grande do Sul
-	estado[21] := 'ro';    -- Rondonia
-	estado[22] := 'rr';    -- Roraima
-	estado[23] := 'sc';    -- Santa Catarina
-	estado[24] := 'sp';    -- Sao Paulo
-	estado[25] := 'se';    -- Sergipe
-	estado[26] := 'to';    -- Tocantins
- 
-   FOR contador IN 0..26 LOOP
-      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.mortalidade.censo2010.'|| estado[contador] ||'" ';
-      execute 'CREATE SCHEMA "microdados.amostra.mortalidade.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
-      --Raise Notice estado ;
-   END LOOP;
-END
-$criacao_esquemas_estados_mortalidadel$
-;
-
-DROP SCHEMA IF EXISTS "microdados.amostra.pessoas.censo2010";
-
-CREATE SCHEMA "microdados.amostra.pessoas.censo2010"
-  AUTHORIZATION "administrador-banco";
-
-DO
-$criacao_esquemas_estados_pessoas$
-DECLARE
- estado   varchar[] := '{}';
- contador integer; 
-BEGIN 
-	estado[0]  := 'ac';    -- Acre
-	estado[1]  := 'al';    -- Alagoas
-	estado[2]  := 'ap';    -- Amapa
-	estado[3]  := 'am';    -- amazonas
-	estado[4]  := 'ba';    -- Bahia
-	estado[5]  := 'ce';    -- Ceara
-	estado[6]  := 'df';    -- Distrito Federal
-	estado[7]  := 'es';    -- Esp√≠rito Santo
-	estado[8]  := 'go';    -- Goias
-	estado[9]  := 'ma';    -- Maranhao
-	estado[10] := 'mt';    -- Mato Grosso
-	estado[11] := 'ms';    -- Mato Grosso do Sul
-	estado[12] := 'mg';    -- Minas Gerais
-	estado[13] := 'pa';    -- Para 
-	estado[14] := 'pb';    -- Paraiba
-	estado[15] := 'pe';    -- Pernambuco
-	estado[16] := 'pi';    -- Piaui
-	estado[17] := 'pr';    -- Parana
-	estado[18] := 'rj';    -- Rio de Janeiro
-	estado[19] := 'rn';    -- Rio Grande do Norte
-	estado[20] := 'rs';    -- Rio Grande do Sul
-	estado[21] := 'ro';    -- Rondonia
-	estado[22] := 'rr';    -- Roraima
-	estado[23] := 'sc';    -- Santa Catarina
-	estado[24] := 'sp';    -- Sao Paulo
-	estado[25] := 'se';    -- Sergipe
-	estado[26] := 'to';    -- Tocantins
- 
-   FOR contador IN 0..26 LOOP
-      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.pessoas.censo2010.'|| estado[contador] ||'" ';
-      execute 'CREATE SCHEMA "microdados.amostra.pessoas.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
-      --Raise Notice estado ;
-   END LOOP;
-END
-$criacao_esquemas_estados_pessoas$
-;
-
-
-DROP EXTENSION IF EXISTS postgis;
-CREATE EXTENSION postgis SCHEMA public VERSION "2.5.3";
-
-DROP TABLE IF EXISTS "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1";
-CREATE TABLE "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1"
-(
-  chave integer,
-  id serial,
-  geom geometry(MultiPolygon,4674),
-  count numeric,
-  area_pond character varying(254),
-  pesquisa varchar(100),
-  ano_ref date,
-  hora_impor timestamp
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1"
-  OWNER TO "administrador-banco";
-```
-
-+ 7-Importar arquivos para o Banco de Dados
 
 ```{r carrega_microdados_da_amostra,  include=FALSE, eval=FALSE}
 
@@ -1438,1287 +1183,353 @@ dbWriteTable(conexao, c("br.pessoas.censo2010","censo2010pessoas"), value = pess
 # Emigracao
 ##########################################################################################
 
-```
-#### Etapas dentro do Banco
-+ 1-Corrigir caixa dos dados - tudo minusculo
-+ 2-Corrigir tipagem dos dados
-+ 3-Remover dados duplicados, se poss√≠vel
-+ 4-Identificar a chave prim√°ria - Unidades da popula√ß√£o em cada caso
-+ 5-Conectar o dataset estat√≠stico ao geogr√°fico
-
-#### Microdados da Amostra - Domicilios
-```SQL
-DROP TABLE IF EXISTS "br.domicilios.censo2010"."censo2010domiciliosfinal";
-
-		SELECT 
-				        c.geom,
-					c.codigo,
-					c.geocodigo,
-					c.estado,
-					c.municipio,
-					c.area_ponderacao,
-					c."V0001",
-					c."V0002",
-					c."V0011",
-					c."V0300",
-					c."V0010",
-					c."V1001",
-					c."V1002",
-					c."V1003",
-					c."V1004",
-					c."V1006",
-					c."V4001",
-					c."V4002",
-					c."V0201",
-					c."V2011",
-					c."V2012",
-					c."V0202",
-					c."V0203",
-					c."V6203",
-					c."V0204",
-					c."V6204",
-					c."V0205",
-					c."V0206",
-					c."V0207",
-					c."V0208",
-					c."V0209",
-					c."V0210",
-					c."V0211",
-					c."V0212",
-					c."V0213",
-					c."V0214",
-					c."V0215",
-					c."V0216",
-					c."V0217",
-					c."V0218",
-					c."V0219",
-					c."V0220",
-					c."V0221",
-					c."V0222",
-					c."V0301",
-					c."V0401",
-					c."V0402",
-					c."V0701",
-					c."V6529",
-					c."V6530",
-					c."V6531",
-					c."V6532",
-					c."V6600",
-					c."V6210",
-					c."V1005"
-                INTO "br.domicilios.censo2010"."censo2010domiciliosfinal"
-		FROM
-		(
-			SELECT DISTINCT ON (codigo)
-					a.geom,
-					a.codigo,
-					a.geocodigo, -- character varying(17),
-					a.estado,
-					a.municipio,
-					a.area_ponderacao, -- character varying(6),
-					b."V0001",
-					b."V0002",
-					b."V0011",
-					b."V0300",
-					b."V0010",
-					b."V1001",
-					b."V1002",
-					b."V1003",
-					b."V1004",
-					b."V1006",
-					b."V4001",
-					b."V4002",
-					b."V0201",
-					b."V2011",
-					b."V2012",
-					b."V0202",
-					b."V0203",
-					b."V6203",
-					b."V0204",
-					b."V6204",
-					b."V0205",
-					b."V0206",
-					b."V0207",
-					b."V0208",
-					b."V0209",
-					b."V0210",
-					b."V0211",
-					b."V0212",
-					b."V0213",
-					b."V0214",
-					b."V0215",
-					b."V0216",
-					b."V0217",
-					b."V0218",
-					b."V0219",
-					b."V0220",
-					b."V0221",
-					b."V0222",
-					b."V0301",
-					b."V0401",
-					b."V0402",
-					b."V0701",
-					b."V6529",
-					b."V6530",
-					b."V6531",
-					b."V6532",
-					b."V6600",
-					b."V6210",
-					b."V1005"
-			from 
-			    (	
-				select 
-					geom,
-					codigo,
-					geocodigo,
-					estado,
-					municipio,
-					area_ponderacao,
-					id,
-					pesquisa,
-					ano_referencia,
-					tem_problema,
-					tipo_problema
-				from "br.domicilios.censo2010".censo2010area_de_ponderacaofinal				
-				order by codigo
-				ASC
-			     ) as a 
-			join -- n√£o √© query, mas √© pareamento de 2 consultas
-			     (
-				-- Query no. 2 - Contagem de fei√ß√µes duplicadas
-				SELECT
-  "V0001",
-  "V0002",
-  "V0011",
-  "V0300",
-  "V0010",
-  "V1001",
-  "V1002",
-  "V1003",
-  "V1004",
-  "V1006",
-  "V4001",
-  "V4002",
-  "V0201",
-  "V2011",
-  "V2012",
-  "V0202",
-  "V0203",
-  "V6203",
-  "V0204",
-  "V6204",
-  "V0205",
-  "V0206",
-  "V0207",
-  "V0208",
-  "V0209",
-  "V0210",
-  "V0211",
-  "V0212",
-  "V0213",
-  "V0214",
-  "V0215",
-  "V0216",
-  "V0217",
-  "V0218",
-  "V0219",
-  "V0220",
-  "V0221",
-  "V0222",
-  "V0301",
-  "V0401",
-  "V0402",
-  "V0701",
-  "V6529",
-  "V6530",
-  "V6531",
-  "V6532",
-  "V6600",
-  "V6210",
-  "V1005"
-				FROM "br.domicilios.censo2010".censo2010domicilios				
-				ORDER BY "V0011"
-			     ) as b ON ( SUBSTRING(CAST(a.codigo AS TEXT),1,13)) = b."V0011"
-) AS c;			
-
-alter table "br.domicilios.censo2010"."censo2010domiciliosfinal" DROP CONSTRAINT IF EXISTS chave_domicilios_final;
-
-alter table "br.domicilios.censo2010"."censo2010domiciliosfinal" ADD CONSTRAINT chave_chave_domicilios_final PRIMARY KEY(codigo);
-
-DROP INDEX IF EXISTS indice_domicilios_final;
-
-CREATE INDEX indice_domicilios_final
-  ON "br.domicilios.censo2010"."censo2010domiciliosfinal"
-  USING gist
-  (geom);
-```
-
-#### - Microdados da Amostra - Pessoas
-```SQL
-
-DROP TABLE IF EXISTS "br.pessoas.censo2010".censo2010pessoas_new;
-SELECT 
-	CAST("V0001" AS Varchar(2) ),
-	CAST("V0002" AS Varchar(5) ),
-	CAST("V0011" AS Varchar(13) ),
-	CAST("V0300" AS bigint      ),
-	CAST( ROW_NUMBER () OVER ( PARTITION BY "V0011","V0300" ORDER BY "V0300" ) AS int) AS morador_anonimo,
-	CAST("V0010" AS bigint     ),
-	CAST("V1001" AS Varchar(1) ),
-	CAST("V1002" AS Varchar(2) ),
-	CAST("V1003" AS Varchar(3) ),
-	CAST("V1004" AS Varchar(2) ),
-	CAST("V1006" AS Varchar(1) ),
-	CAST("V0502" AS Varchar(2) ),
-	CAST("V0504" AS Varchar(2) ),
-	CAST("V0601" AS Varchar(1) ),
-	CAST("V6033" AS int        ),
-	CAST("V6036" AS int        ),
-	CAST("V6037" AS int        ),
-	CAST("V6040" AS Varchar(1) ),
-	CAST("V0606" AS Varchar(1) ),
-	CAST("V0613" AS Varchar(1) ),
-	CAST("V0614" AS Varchar(1) ),
-	CAST("V0615" AS Varchar(1) ),
-	CAST("V0616" AS Varchar(1) ),
-	CAST("V0617" AS Varchar(1) ),
-	CAST("V0618" AS Varchar(1) ),
-	CAST("V0619" AS Varchar(1) ),
-	CAST("V0620" AS Varchar(1) ),
-	CAST("V0621" AS int        ),
-	CAST("V0622" AS Varchar(1) ),
-	CAST("V6222" AS Varchar(7) ),
-	CAST("V6224" AS Varchar(7) ),
-	CAST("V0623" AS int        ),
-	CAST("V0624" AS int        ),
-	CAST("V0625" AS Varchar(1) ),
-	CAST("V6252" AS Varchar(7) ),
-	CAST("V6254" AS Varchar(7) ),
-	CAST("V6256" AS Varchar(7) ),
-	CAST("V0626" AS Varchar(1) ),
-	CAST("V6262" AS Varchar(7) ),
-	CAST("V6264" AS Varchar(7) ),
-	CAST("V6266" AS Varchar(7) ),
-	CAST("V0627" AS Varchar(1) ),
-	CAST("V0628" AS Varchar(1) ),
-	CAST("V0629" AS Varchar(2) ),
-	CAST("V0630" AS Varchar(2) ),
-	CAST("V0631" AS Varchar(1) ),
-	CAST("V0632" AS Varchar(1) ),
-	CAST("V0633" AS Varchar(2) ),
-	CAST("V0634" AS Varchar(1) ),
-	CAST("V0635" AS Varchar(1) ),
-	CAST("V6400" AS Varchar(1) ),
-	CAST("V6352" AS Varchar(3) ),
-	CAST("V6354" AS Varchar(3) ),
-	CAST("V6356" AS Varchar(10) ),
-	CAST("V0636" AS Varchar(1) ),
-	CAST("V6362" AS Varchar(7) ),
-	CAST("V6364" AS Varchar(7) ),
-	CAST("V6366" AS Varchar(7) ),
-	CAST("V0637" AS Varchar(1) ),
-	CAST("V0638" AS Varchar(2) ),
-	CAST("V0639" AS Varchar(1) ),
-	CAST("V0640" AS Varchar(1) ),
-	CAST("V0641" AS Varchar(1) ),
-	CAST("V0642" AS Varchar(1) ),
-	CAST("V0643" AS Varchar(1) ),
-	CAST("V0644" AS Varchar(1) ),
-	CAST("V0645" AS Varchar(1) ),
-	CAST("V6461" AS Varchar(4) ),
-	CAST("V6471" AS Varchar(5) ),
-	CAST("V0648" AS Varchar(1) ),
-	CAST("V0649" AS Varchar(1) ),
-	CAST("V0650" AS Varchar(1) ),
-	CAST("V0651" AS Varchar(1) ),
-	CAST("V6511" AS int        ),
-	CAST("V6513" AS int        ),
-	CAST("V6514" AS int        ),
-	CAST("V0652" AS Varchar(1) ),
-	CAST("V6521" AS int        ),
-	CAST("V6524" AS int        ),
-	CAST("V6525" AS int        ),
-	CAST("V6526" AS int        ),
-	CAST("V6527" AS int        ),
-	CAST("V6528" AS int        ),
-	CAST("V6529" AS int        ),
-	CAST("V6530" AS int        ),
-	CAST("V6531" AS int        ),
-	CAST("V6532" AS int        ),
-	CAST("V0653" AS int        ),
-	CAST("V0654" AS Varchar(1) ),
-	CAST("V0655" AS Varchar(1) ),
-	CAST("V0656" AS Varchar(1) ),
-	CAST("V0657" AS Varchar(1) ),
-	CAST("V0658" AS Varchar(1) ),
-	CAST("V0659" AS Varchar(1) ),
-	CAST("V6591" AS int        ),
-	CAST("V0660" AS Varchar(1) ),
-	CAST("V6602" AS Varchar(7) ),
-	CAST("V6604" AS Varchar(7) ),
-	CAST("V6606" AS Varchar(7) ),
-	CAST("V0661" AS Varchar(1) ),
-	CAST("V0662" AS Varchar(1) ),
-	CAST("V0663" AS Varchar(1) ),
-	CAST("V6631" AS int        ),
-	CAST("V6632" AS int        ),
-	CAST("V6633" AS int        ),
-	CAST("V0664" AS Varchar(1) ),
-	CAST("V6641" AS int        ),
-	CAST("V6642" AS int        ),
-	CAST("V6643" AS int        ),
-	CAST("V0665" AS int        ),
-	CAST("V6660" AS int        ),
-	CAST("V6664" AS Varchar(1) ),
-	CAST("V0667" AS Varchar(1) ),
-	CAST("V0668" AS Varchar(1) ),
-	CAST("V6681" AS Varchar(2) ),
-	CAST("V6682" AS Varchar(4) ),
-	CAST("V0669" AS Varchar(1) ),
-	CAST("V6691" AS int        ),
-	CAST("V6692" AS int        ),
-	CAST("V6693" AS int        ),
-	CAST("V6800" AS int        ),
-	CAST("V0670" AS Varchar(1) ),
-	CAST("V0671" AS Varchar(2) ),
-	CAST("V6900" AS Varchar(1) ),
-	CAST("V6910" AS Varchar(1) ),
-	CAST("V6920" AS Varchar(1) ),
-	CAST("V6930" AS Varchar(1) ),
-	CAST("V6940" AS Varchar(1) ),
-	CAST("V6121" AS Varchar(3) ),
-	CAST("V0604" AS Varchar(1) ),
-	CAST("V0605" AS Varchar(2) ),
-	CAST("V5020" AS Varchar(2) ),
-	CAST("V5060" AS int        ),
-	CAST("V5070" AS int        ),
-	CAST("V5080" AS int        ),
-	CAST("V6462" AS Varchar(4) ),
-	CAST("V6472" AS Varchar(5) ),
-	CAST("V5110" AS Varchar(1) ),
-	CAST("V5120" AS Varchar(1) ),
-	CAST("V5030" AS Varchar(1) ),
-	CAST("V5040" AS Varchar(1) ),
-	CAST("V5090" AS Varchar(1) ),
-	CAST("V5100" AS Varchar(1) ),
-	CAST("V5130" AS Varchar(2) ),
-	CAST("M0502" AS Varchar(1) ),
-	CAST("M0601" AS Varchar(1) ),
-	CAST("M6033" AS Varchar(1) ),
-	CAST("M0606" AS Varchar(1) ),
-	CAST("M0613" AS Varchar(1) ),
-	CAST("M0614" AS Varchar(1) ),
-	CAST("M0615" AS Varchar(1) ),
-	CAST("M0616" AS Varchar(1) ),
-	CAST("M0617" AS Varchar(1) ),
-	CAST("M0618" AS Varchar(1) ),
-	CAST("M0619" AS Varchar(1) ),
-	CAST("M0620" AS Varchar(1) ),
-	CAST("M0621" AS Varchar(1) ),
-	CAST("M0622" AS Varchar(1) ),
-	CAST("M6222" AS Varchar(1) ),
-	CAST("M6224" AS Varchar(1) ),
-	CAST("M0623" AS Varchar(1) ),
-	CAST("M0624" AS Varchar(1) ),
-	CAST("M0625" AS Varchar(1) ),
-	CAST("M6252" AS Varchar(1) ),
-	CAST("M6254" AS Varchar(1) ),
-	CAST("M6256" AS Varchar(1) ),
-	CAST("M0626" AS Varchar(1) ),
-	CAST("M6262" AS Varchar(1) ),
-	CAST("M6264" AS Varchar(1) ),
-	CAST("M6266" AS Varchar(1) ),
-	CAST("M0627" AS Varchar(1) ),
-	CAST("M0628" AS Varchar(1) ),
-	CAST("M0629" AS Varchar(1) ),
-	CAST("M0630" AS Varchar(1) ),
-	CAST("M0631" AS Varchar(1) ),
-	CAST("M0632" AS Varchar(1) ),
-	CAST("M0633" AS Varchar(1) ),
-	CAST("M0634" AS Varchar(1) ),
-	CAST("M0635" AS Varchar(1) ),
-	CAST("M6352" AS Varchar(1) ),
-	CAST("M6354" AS Varchar(1) ),
-	CAST("M6356" AS Varchar(1) ),
-	CAST("M0636" AS Varchar(1) ),
-	CAST("M6362" AS Varchar(1) ),
-	CAST("M6364" AS Varchar(1) ),
-	CAST("M6366" AS Varchar(1) ),
-	CAST("M0637" AS Varchar(1) ),
-	CAST("M0638" AS Varchar(1) ),
-	CAST("M0639" AS Varchar(1) ),
-	CAST("M0640" AS Varchar(1) ),
-	CAST("M0641" AS Varchar(1) ),
-	CAST("M0642" AS Varchar(1) ),
-	CAST("M0643" AS Varchar(1) ),
-	CAST("M0644" AS Varchar(1) ),
-	CAST("M0645" AS Varchar(1) ),
-	CAST("M6461" AS Varchar(1) ),
-	CAST("M6471" AS Varchar(1) ),
-	CAST("M0648" AS Varchar(1) ),
-	CAST("M0649" AS Varchar(1) ),
-	CAST("M0650" AS Varchar(1) ),
-	CAST("M0651" AS Varchar(1) ),
-	CAST("M6511" AS Varchar(1) ),
-	CAST("M0652" AS Varchar(1) ),
-	CAST("M6521" AS Varchar(1) ),
-	CAST("M0653" AS Varchar(1) ),
-	CAST("M0654" AS Varchar(1) ),
-	CAST("M0655" AS Varchar(1) ),
-	CAST("M0656" AS Varchar(1) ),
-	CAST("M0657" AS Varchar(1) ),
-	CAST("M0658" AS Varchar(1) ),
-	CAST("M0659" AS Varchar(1) ),
-	CAST("M6591" AS Varchar(1) ),
-	CAST("M0660" AS Varchar(1) ),
-	CAST("M6602" AS Varchar(1) ),
-	CAST("M6604" AS Varchar(1) ),
-	CAST("M6606" AS Varchar(1) ),
-	CAST("M0661" AS Varchar(1) ),
-	CAST("M0662" AS Varchar(1) ),
-	CAST("M0663" AS Varchar(1) ),
-	CAST("M6631" AS Varchar(1) ),
-	CAST("M6632" AS Varchar(1) ),
-	CAST("M6633" AS Varchar(1) ),
-	CAST("M0664" AS Varchar(1) ),
-	CAST("M6641" AS Varchar(1) ),
-	CAST("M6642" AS Varchar(1) ),
-	CAST("M6643" AS Varchar(1) ),
-	CAST("M0665" AS Varchar(1) ),
-	CAST("M6660" AS Varchar(1) ),
-	CAST("M0667" AS Varchar(1) ),
-	CAST("M0668" AS Varchar(1) ),
-	CAST("M6681" AS Varchar(1) ),
-	CAST("M6682" AS Varchar(1) ),
-	CAST("M0669" AS Varchar(1) ),
-	CAST("M6691" AS Varchar(1) ),
-	CAST("M6692" AS Varchar(1) ),
-	CAST("M6693" AS Varchar(1) ),
-	CAST("M0670" AS Varchar(1) ),
-	CAST("M0671" AS Varchar(1) ),
-	CAST("M6800" AS Varchar(1) ),
-	CAST("M6121" AS Varchar(1) ),
-	CAST("M0604" AS Varchar(1) ),
-	CAST("M0605" AS Varchar(1) ),
-	CAST("M6462" AS Varchar(1) ),
-	CAST("M6472" AS Varchar(1) ),
-	CAST("V1005" AS Varchar(1) )
-  INTO
-  "br.pessoas.censo2010".censo2010pessoas_new
-  FROM 
-  "br.pessoas.censo2010".censo2010pessoas
-  ORDER BY
-  "V0011","V0300",morador_anonimo;
-
-ALTER TABLE "br.pessoas.censo2010".censo2010pessoas RENAME TO censo2010pessoas_antigo;
-ALTER TABLE "br.pessoas.censo2010".censo2010pessoas_new RENAME TO censo2010pessoas;
-ALTER TABLE "br.pessoas.censo2010".censo2010pessoas ADD CONSTRAINT "chave_pessoas" PRIMARY KEY ("V0011","V0300",morador_anonimo);
-
-DROP TABLE IF EXISTS "br.pessoas.censo2010"."censo2010pessoasfinal";
-
-		SELECT 
-				c.geom,
-				c.codigo,
-				c.geocodigo,
-				c.estado,
-				c.municipio,
-				c.area_ponderacao,
-				c."V0001",
-				c."V0002",
-				c."V0011",
-				c."V0300",
-				c.morador_anonimo
-				c."V0010",
-				c."V1001",
-				c."V1002",
-				c."V1003",
-				c."V1004",
-				c."V1006",
-				c."V0502",
-				c."V0504",
-				c."V0601",
-				c."V6033",
-				c."V6036",
-				c."V6037",
-				c."V6040",
-				c."V0606",
-				c."V0613",
-				c."V0614",
-				c."V0615",
-				c."V0616",
-				c."V0617",
-				c."V0618",
-				c."V0619",
-				c."V0620",
-				c."V0621",
-				c."V0622",
-				c."V6222",
-				c."V6224",
-				c."V0623",
-				c."V0624",
-				c."V0625",
-				c."V6252",
-				c."V6254",
-				c."V6256",
-				c."V0626",
-				c."V6262",
-				c."V6264",
-				c."V6266",
-				c."V0627",
-				c."V0628",
-				c."V0629",
-				c."V0630",
-				c."V0631",
-				c."V0632",
-				c."V0633",
-				c."V0634",
-				c."V0635",
-				c."V6400",
-				c."V6352",
-				c."V6354",
-				c."V6356",
-				c."V0636",
-				c."V6362",
-				c."V6364",
-				c."V6366",
-				c."V0637",
-				c."V0638",
-				c."V0639",
-				c."V0640",
-				c."V0641",
-				c."V0642",
-				c."V0643",
-				c."V0644",
-				c."V0645",
-				c."V6461",
-				c."V6471",
-				c."V0648",
-				c."V0649",
-				c."V0650",
-				c."V0651",
-				c."V6511",
-				c."V6513",
-				c."V6514",
-				c."V0652",
-				c."V6521",
-				c."V6524",
-				c."V6525",
-				c."V6526",
-				c."V6527",
-				c."V6528",
-				c."V6529",
-				c."V6530",
-				c."V6531",
-				c."V6532",
-				c."V0653",
-				c."V0654",
-				c."V0655",
-				c."V0656",
-				c."V0657",
-				c."V0658",
-				c."V0659",
-				c."V6591",
-				c."V0660",
-				c."V6602",
-				c."V6604",
-				c."V6606",
-				c."V0661",
-				c."V0662",
-				c."V0663",
-				c."V6631",
-				c."V6632",
-				c."V6633",
-				c."V0664",
-				c."V6641",
-				c."V6642",
-				c."V6643",
-				c."V0665",
-				c."V6660",
-				c."V6664",
-				c."V0667",
-				c."V0668",
-				c."V6681",
-				c."V6682",
-				c."V0669",
-				c."V6691",
-				c."V6692",
-				c."V6693",
-				c."V6800",
-				c."V0670",
-				c."V0671",
-				c."V6900",
-				c."V6910",
-				c."V6920",
-				c."V6930",
-				c."V6940",
-				c."V6121",
-				c."V0604",
-				c."V0605",
-				c."V5020",
-				c."V5060",
-				c."V5070",
-				c."V5080",
-				c."V6462",
-				c."V6472",
-				c."V5110",
-				c."V5120",
-				c."V5030",
-				c."V5040",
-				c."V5090",
-				c."V5100",
-				c."V5130",
-				c."M0502",
-				c."M0601",
-				c."M6033",
-				c."M0606",
-				c."M0613",
-				c."M0614",
-				c."M0615",
-				c."M0616",
-				c."M0617",
-				c."M0618",
-				c."M0619",
-				c."M0620",
-				c."M0621",
-				c."M0622",
-				c."M6222",
-				c."M6224",
-				c."M0623",
-				c."M0624",
-				c."M0625",
-				c."M6252",
-				c."M6254",
-				c."M6256",
-				c."M0626",
-				c."M6262",
-				c."M6264",
-				c."M6266",
-				c."M0627",
-				c."M0628",
-				c."M0629",
-				c."M0630",
-				c."M0631",
-				c."M0632",
-				c."M0633",
-				c."M0634",
-				c."M0635",
-				c."M6352",
-				c."M6354",
-				c."M6356",
-				c."M0636",
-				c."M6362",
-				c."M6364",
-				c."M6366",
-				c."M0637",
-				c."M0638",
-				c."M0639",
-				c."M0640",
-				c."M0641",
-				c."M0642",
-				c."M0643",
-				c."M0644",
-				c."M0645",
-				c."M6461",
-				c."M6471",
-				c."M0648",
-				c."M0649",
-				c."M0650",
-				c."M0651",
-				c."M6511",
-				c."M0652",
-				c."M6521",
-				c."M0653",
-				c."M0654",
-				c."M0655",
-				c."M0656",
-				c."M0657",
-				c."M0658",
-				c."M0659",
-				c."M6591",
-				c."M0660",
-				c."M6602",
-				c."M6604",
-				c."M6606",
-				c."M0661",
-				c."M0662",
-				c."M0663",
-				c."M6631",
-				c."M6632",
-				c."M6633",
-				c."M0664",
-				c."M6641",
-				c."M6642",
-				c."M6643",
-				c."M0665",
-				c."M6660",
-				c."M0667",
-				c."M0668",
-				c."M6681",
-				c."M6682",
-				c."M0669",
-				c."M6691",
-				c."M6692",
-				c."M6693",
-				c."M0670",
-				c."M0671",
-				c."M6800",
-				c."M6121",
-				c."M0604",
-				c."M0605",
-				c."M6462",
-				c."M6472",
-				c."V1005"
-                INTO "br.pessoas.censo2010"."censo2010pessoasfinal"
-		FROM
-		(
-			SELECT DISTINCT ON (codigo)
-					a.geom,
-					a.codigo,
-					a.geocodigo, -- character varying(17),
-					a.estado,
-					a.municipio,
-					a.area_ponderacao, -- character varying(6),
-					b."V0001",
-					b."V0002",
-					b."V0011",
-					b."V0300",
-					b.morador_anonimo
-					b."V0010",
-					b."V1001",
-					b."V1002",
-					b."V1003",
-					b."V1004",
-					b."V1006",
-					b."V0502",
-					b."V0504",
-					b."V0601",
-					b."V6033",
-					b."V6036",
-					b."V6037",
-					b."V6040",
-					b."V0606",
-					b."V0613",
-					b."V0614",
-					b."V0615",
-					b."V0616",
-					b."V0617",
-					b."V0618",
-					b."V0619",
-					b."V0620",
-					b."V0621",
-					b."V0622",
-					b."V6222",
-					b."V6224",
-					b."V0623",
-					b."V0624",
-					b."V0625",
-					b."V6252",
-					b."V6254",
-					b."V6256",
-					b."V0626",
-					b."V6262",
-					b."V6264",
-					b."V6266",
-					b."V0627",
-					b."V0628",
-					b."V0629",
-					b."V0630",
-					b."V0631",
-					b."V0632",
-					b."V0633",
-					b."V0634",
-					b."V0635",
-					b."V6400",
-					b."V6352",
-					b."V6354",
-					b."V6356",
-					b."V0636",
-					b."V6362",
-					b."V6364",
-					b."V6366",
-					b."V0637",
-					b."V0638",
-					b."V0639",
-					b."V0640",
-					b."V0641",
-					b."V0642",
-					b."V0643",
-					b."V0644",
-					b."V0645",
-					b."V6461",
-					b."V6471",
-					b."V0648",
-					b."V0649",
-					b."V0650",
-					b."V0651",
-					b."V6511",
-					b."V6513",
-					b."V6514",
-					b."V0652",
-					b."V6521",
-					b."V6524",
-					b."V6525",
-					b."V6526",
-					b."V6527",
-					b."V6528",
-					b."V6529",
-					b."V6530",
-					b."V6531",
-					b."V6532",
-					b."V0653",
-					b."V0654",
-					b."V0655",
-					b."V0656",
-					b."V0657",
-					b."V0658",
-					b."V0659",
-					b."V6591",
-					b."V0660",
-					b."V6602",
-					b."V6604",
-					b."V6606",
-					b."V0661",
-					b."V0662",
-					b."V0663",
-					b."V6631",
-					b."V6632",
-					b."V6633",
-					b."V0664",
-					b."V6641",
-					b."V6642",
-					b."V6643",
-					b."V0665",
-					b."V6660",
-					b."V6664",
-					b."V0667",
-					b."V0668",
-					b."V6681",
-					b."V6682",
-					b."V0669",
-					b."V6691",
-					b."V6692",
-					b."V6693",
-					b."V6800",
-					b."V0670",
-					b."V0671",
-					b."V6900",
-					b."V6910",
-					b."V6920",
-					b."V6930",
-					b."V6940",
-					b."V6121",
-					b."V0604",
-					b."V0605",
-					b."V5020",
-					b."V5060",
-					b."V5070",
-					b."V5080",
-					b."V6462",
-					b."V6472",
-					b."V5110",
-					b."V5120",
-					b."V5030",
-					b."V5040",
-					b."V5090",
-					b."V5100",
-					b."V5130",
-					b."M0502",
-					b."M0601",
-					b."M6033",
-					b."M0606",
-					b."M0613",
-					b."M0614",
-					b."M0615",
-					b."M0616",
-					b."M0617",
-					b."M0618",
-					b."M0619",
-					b."M0620",
-					b."M0621",
-					b."M0622",
-					b."M6222",
-					b."M6224",
-					b."M0623",
-					b."M0624",
-					b."M0625",
-					b."M6252",
-					b."M6254",
-					b."M6256",
-					b."M0626",
-					b."M6262",
-					b."M6264",
-					b."M6266",
-					b."M0627",
-					b."M0628",
-					b."M0629",
-					b."M0630",
-					b."M0631",
-					b."M0632",
-					b."M0633",
-					b."M0634",
-					b."M0635",
-					b."M6352",
-					b."M6354",
-					b."M6356",
-					b."M0636",
-					b."M6362",
-					b."M6364",
-					b."M6366",
-					b."M0637",
-					b."M0638",
-					b."M0639",
-					b."M0640",
-					b."M0641",
-					b."M0642",
-					b."M0643",
-					b."M0644",
-					b."M0645",
-					b."M6461",
-					b."M6471",
-					b."M0648",
-					b."M0649",
-					b."M0650",
-					b."M0651",
-					b."M6511",
-					b."M0652",
-					b."M6521",
-					b."M0653",
-					b."M0654",
-					b."M0655",
-					b."M0656",
-					b."M0657",
-					b."M0658",
-					b."M0659",
-					b."M6591",
-					b."M0660",
-					b."M6602",
-					b."M6604",
-					b."M6606",
-					b."M0661",
-					b."M0662",
-					b."M0663",
-					b."M6631",
-					b."M6632",
-					b."M6633",
-					b."M0664",
-					b."M6641",
-					b."M6642",
-					b."M6643",
-					b."M0665",
-					b."M6660",
-					b."M0667",
-					b."M0668",
-					b."M6681",
-					b."M6682",
-					b."M0669",
-					b."M6691",
-					b."M6692",
-					b."M6693",
-					b."M0670",
-					b."M0671",
-					b."M6800",
-					b."M6121",
-					b."M0604",
-					b."M0605",
-					b."M6462",
-					b."M6472",
-					b."V1005"
-			from 
-			    (	
-				select 
-					geom,
-					codigo,
-					geocodigo,
-					estado,
-					municipio,
-					area_ponderacao,
-					id,
-					pesquisa,
-					ano_referencia,
-					tem_problema,
-					tipo_problema
-				from "br.domicilios.censo2010".censo2010area_de_ponderacaofinal				
-				order by codigo
-				ASC
-			     ) as a 
-			join -- n√£o √© query, mas √© pareamento de 2 consultas
-			     (
-				-- Query no. 2 - Contagem de fei√ß√µes duplicadas
-				SELECT
-				  "V0001",
-				  "V0002",
-				  "V0011",
-				  "V0300",
-				  morador_anonimo,
-				  "V0010",
-				  "V1001",
-				  "V1002",
-				  "V1003",
-				  "V1004",
-				  "V1006",
-				  "V0502",
-				  "V0504",
-				  "V0601",
-				  "V6033",
-				  "V6036",
-				  "V6037",
-				  "V6040",
-				  "V0606",
-				  "V0613",
-				  "V0614",
-				  "V0615",
-				  "V0616",
-				  "V0617",
-				  "V0618",
-				  "V0619",
-				  "V0620",
-				  "V0621",
-				  "V0622",
-				  "V6222",
-				  "V6224",
-				  "V0623",
-				  "V0624",
-				  "V0625",
-				  "V6252",
-				  "V6254",
-				  "V6256",
-				  "V0626",
-				  "V6262",
-				  "V6264",
-				  "V6266",
-				  "V0627",
-				  "V0628",
-				  "V0629",
-				  "V0630",
-				  "V0631",
-				  "V0632",
-				  "V0633",
-				  "V0634",
-				  "V0635",
-				  "V6400",
-				  "V6352",
-				  "V6354",
-				  "V6356",
-				  "V0636",
-				  "V6362",
-				  "V6364",
-				  "V6366",
-				  "V0637",
-				  "V0638",
-				  "V0639",
-				  "V0640",
-				  "V0641",
-				  "V0642",
-				  "V0643",
-				  "V0644",
-				  "V0645",
-				  "V6461",
-				  "V6471",
-				  "V0648",
-				  "V0649",
-				  "V0650",
-				  "V0651",
-				  "V6511",
-				  "V6513",
-				  "V6514",
-				  "V0652",
-				  "V6521",
-				  "V6524",
-				  "V6525",
-				  "V6526",
-				  "V6527",
-				  "V6528",
-				  "V6529",
-				  "V6530",
-				  "V6531",
-				  "V6532",
-				  "V0653",
-				  "V0654",
-				  "V0655",
-				  "V0656",
-				  "V0657",
-				  "V0658",
-				  "V0659",
-				  "V6591",
-				  "V0660",
-				  "V6602",
-				  "V6604",
-				  "V6606",
-				  "V0661",
-				  "V0662",
-				  "V0663",
-				  "V6631",
-				  "V6632",
-				  "V6633",
-				  "V0664",
-				  "V6641",
-				  "V6642",
-				  "V6643",
-				  "V0665",
-				  "V6660",
-				  "V6664",
-				  "V0667",
-				  "V0668",
-				  "V6681",
-				  "V6682",
-				  "V0669",
-				  "V6691",
-				  "V6692",
-				  "V6693",
-				  "V6800",
-				  "V0670",
-				  "V0671",
-				  "V6900",
-				  "V6910",
-				  "V6920",
-				  "V6930",
-				  "V6940",
-				  "V6121",
-				  "V0604",
-				  "V0605",
-				  "V5020",
-				  "V5060",
-				  "V5070",
-				  "V5080",
-				  "V6462",
-				  "V6472",
-				  "V5110",
-				  "V5120",
-				  "V5030",
-				  "V5040",
-				  "V5090",
-				  "V5100",
-				  "V5130",
-				  "M0502",
-				  "M0601",
-				  "M6033",
-				  "M0606",
-				  "M0613",
-				  "M0614",
-				  "M0615",
-				  "M0616",
-				  "M0617",
-				  "M0618",
-				  "M0619",
-				  "M0620",
-				  "M0621",
-				  "M0622",
-				  "M6222",
-				  "M6224",
-				  "M0623",
-				  "M0624",
-				  "M0625",
-				  "M6252",
-				  "M6254",
-				  "M6256",
-				  "M0626",
-				  "M6262",
-				  "M6264",
-				  "M6266",
-				  "M0627",
-				  "M0628",
-				  "M0629",
-				  "M0630",
-				  "M0631",
-				  "M0632",
-				  "M0633",
-				  "M0634",
-				  "M0635",
-				  "M6352",
-				  "M6354",
-				  "M6356",
-				  "M0636",
-				  "M6362",
-				  "M6364",
-				  "M6366",
-				  "M0637",
-				  "M0638",
-				  "M0639",
-				  "M0640",
-				  "M0641",
-				  "M0642",
-				  "M0643",
-				  "M0644",
-				  "M0645",
-				  "M6461",
-				  "M6471",
-				  "M0648",
-				  "M0649",
-				  "M0650",
-				  "M0651",
-				  "M6511",
-				  "M0652",
-				  "M6521",
-				  "M0653",
-				  "M0654",
-				  "M0655",
-				  "M0656",
-				  "M0657",
-				  "M0658",
-				  "M0659",
-				  "M6591",
-				  "M0660",
-				  "M6602",
-				  "M6604",
-				  "M6606",
-				  "M0661",
-				  "M0662",
-				  "M0663",
-				  "M6631",
-				  "M6632",
-				  "M6633",
-				  "M0664",
-				  "M6641",
-				  "M6642",
-				  "M6643",
-				  "M0665",
-				  "M6660",
-				  "M0667",
-				  "M0668",
-				  "M6681",
-				  "M6682",
-				  "M0669",
-				  "M6691",
-				  "M6692",
-				  "M6693",
-				  "M0670",
-				  "M0671",
-				  "M6800",
-				  "M6121",
-				  "M0604",
-				  "M0605",
-				  "M6462",
-				  "M6472",
-				  "V1005"
-				FROM "br.pessoas.censo2010".censo2010pessoas				
-				ORDER BY "V0011"
-			     ) as b ON ( SUBSTRING(CAST(a.codigo AS TEXT),1,13)) = b."V0011"
-) AS c;			
-
-alter table "br.pessoas.censo2010"."censo2010pessoasfinal" DROP CONSTRAINT IF EXISTS chave_pessoas_final;
-
-alter table "br.pessoas.censo2010"."censo2010pessoasfinal" ADD CONSTRAINT chave_chave_pessoas_final PRIMARY KEY(codigo);
-
-DROP INDEX IF EXISTS indice_pessoas_final;
-
-CREATE INDEX indice_pessoas_final
-  ON "br.pessoas.censo2010"."censo2010pessoasfinal"
-  USING gist
-  (geom);
-
 
 ```
 
-# - Arquivos de apoio:
-## - Bases R - Microdados da Amostra - Domicilios
-## - Bases R - Microdados da Amostra - Pessoas
+```{r obtem_iconv, include=FALSE, eval=FALSE}
+sistema <- plataforma()
 
+switch(sistema,
+windows={
+system("cmd /c chcp 1252 && csvcut -e iso-8859-1 -n basicos_todos ")
+  
+},
+linux={
+  
+},
+osx={
+  
+}
+)
+
+```
+
+
+
+
+
+```{r instalando_ferramentas_python_banco, fig.cap ="InstalaÁ„o do pgcli via Python do QGIS", eval=FALSE}
+system("cmd /c python -m pip install -U --user --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org pgcli")
+```
+
+```{sql, eval=FALSE}
+-- Apagando usuario "administrador-banco"
+DROP ROLE IF EXISTS "administrador-banco";
+```
+
+```{r sql_apaga_usuario_banco, fig.cap ="Apagar para recriar o usuario adaminitrador do banco", eval=FALSE}
+apaga_usuario_administrador <-
+"
+DROP ROLE IF EXISTS \"administrador-banco\";
+"
+Sys.setenv(postgres_apaga_usuario_administrador=apaga_usuario_administrador)
+
+system("cmd /c chcp 1252 &&  set PGPASSWORD=Acfolley007 && set %postgres_apaga_usuario_administrador% ")
+
+```
+
+```{r sql_cria_usuario_e_senha, eval=FALSE}
+
+CREATE ROLE "administrador-banco" LOGIN
+  ENCRYPTED PASSWORD 'md51e565a9f3186879158f90e8a2f194978'
+  SUPERUSER INHERIT CREATEDB CREATEROLE REPLICATION;
+COMMENT ON ROLE "administrador-banco" IS 'Administrador do Banco de Dados Abertos.';
+```
+
+```{r sql_cria_banco, eval=FALSE}
+
+-- DROP DATABASE "censo2010-ibge-microdados-site";
+
+CREATE DATABASE "censo2010-ibge-microdados-site"
+  WITH OWNER = "administrador-banco"
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'pt_BR.UTF-8'
+       LC_CTYPE = 'pt_BR.UTF-8'
+       CONNECTION LIMIT = -1;
+```
+
+```{r sql_comenta_banco, eval=FALSE}
+
+COMMENT ON DATABASE "censo2010-ibge-microdados-site"
+  IS 'Banco de Dados Abertos
+CENSO 2010 do IBGE
+censo2010-ibge-microdados-site
+';
+```
+
+```{r sql_cria_esquemas, eval=FALSE}
+
+DROP SCHEMA IF EXISTS "microdados.agregados.setor.censo2010";
+
+CREATE SCHEMA "microdados.agregados.setor.censo2010"
+  AUTHORIZATION "administrador-banco";
+
+DO
+$criacao_esquemas_agregados_setor$
+DECLARE
+ estado   varchar[] := '{}';
+ contador integer; 
+BEGIN 
+	estado[0]  := 'ac';    -- Acre
+	estado[1]  := 'al';    -- Alagoas
+	estado[2]  := 'ap';    -- Amapa
+	estado[3]  := 'am';    -- amazonas
+	estado[4]  := 'ba';    -- Bahia
+	estado[5]  := 'ce';    -- Ceara
+	estado[6]  := 'df';    -- Distrito Federal
+	estado[7]  := 'es';    -- EspÌrito Santo
+	estado[8]  := 'go';    -- Goias
+	estado[9]  := 'ma';    -- Maranhao
+	estado[10] := 'mt';    -- Mato Grosso
+	estado[11] := 'ms';    -- Mato Grosso do Sul
+	estado[12] := 'mg';    -- Minas Gerais
+	estado[13] := 'pa';    -- Para 
+	estado[14] := 'pb';    -- Paraiba
+	estado[15] := 'pe';    -- Pernambuco
+	estado[16] := 'pi';    -- Piaui
+	estado[17] := 'pr';    -- Parana
+	estado[18] := 'rj';    -- Rio de Janeiro
+	estado[19] := 'rn';    -- Rio Grande do Norte
+	estado[20] := 'rs';    -- Rio Grande do Sul
+	estado[21] := 'ro';    -- Rondonia
+	estado[22] := 'rr';    -- Roraima
+	estado[23] := 'sc';    -- Santa Catarina
+	estado[24] := 'sp';    -- Sao Paulo
+	estado[25] := 'se';    -- Sergipe
+	estado[26] := 'to';    -- Tocantins
+ 
+   FOR contador IN 0..26 LOOP
+      execute 'DROP SCHEMA IF EXISTS "microdados.agregados.setor.censo2010.'|| estado[contador] ||'" ';
+      execute 'CREATE SCHEMA "microdados.agregados.setor.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
+      --Raise Notice estado ;
+   END LOOP;
+END
+$criacao_esquemas_agregados_setor$
+;
+
+
+DROP SCHEMA IF EXISTS "microdados.amostra.domicilios.censo2010";
+
+CREATE SCHEMA "microdados.amostra.domicilios.censo2010"
+  AUTHORIZATION "administrador-banco";
+
+DO
+$criacao_esquemas_estados_domicilios$
+DECLARE
+ estado   varchar[] := '{}';
+ contador integer; 
+BEGIN 
+	estado[0]  := 'ac';    -- Acre
+	estado[1]  := 'al';    -- Alagoas
+	estado[2]  := 'ap';    -- Amapa
+	estado[3]  := 'am';    -- amazonas
+	estado[4]  := 'ba';    -- Bahia
+	estado[5]  := 'ce';    -- Ceara
+	estado[6]  := 'df';    -- Distrito Federal
+	estado[7]  := 'es';    -- EspÌrito Santo
+	estado[8]  := 'go';    -- Goias
+	estado[9]  := 'ma';    -- Maranhao
+	estado[10] := 'mt';    -- Mato Grosso
+	estado[11] := 'ms';    -- Mato Grosso do Sul
+	estado[12] := 'mg';    -- Minas Gerais
+	estado[13] := 'pa';    -- Para 
+	estado[14] := 'pb';    -- Paraiba
+	estado[15] := 'pe';    -- Pernambuco
+	estado[16] := 'pi';    -- Piaui
+	estado[17] := 'pr';    -- Parana
+	estado[18] := 'rj';    -- Rio de Janeiro
+	estado[19] := 'rn';    -- Rio Grande do Norte
+	estado[20] := 'rs';    -- Rio Grande do Sul
+	estado[21] := 'ro';    -- Rondonia
+	estado[22] := 'rr';    -- Roraima
+	estado[23] := 'sc';    -- Santa Catarina
+	estado[24] := 'sp';    -- Sao Paulo
+	estado[25] := 'se';    -- Sergipe
+	estado[26] := 'to';    -- Tocantins
+ 
+   FOR contador IN 0..26 LOOP
+      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.domicilios.censo2010.'|| estado[contador] ||'" ';
+      execute 'CREATE SCHEMA "microdados.amostra.domicilios.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
+      --Raise Notice estado ;
+   END LOOP;
+END
+$criacao_esquemas_estados_domicilios$
+;
+
+DROP SCHEMA IF EXISTS "microdados.amostra.emigracao-internacional.censo2010";
+
+CREATE SCHEMA "microdados.amostra.emigracao-internacional.censo2010"
+  AUTHORIZATION "administrador-banco";
+
+DO
+$criacao_esquemas_estados_emigracao_internacional$
+DECLARE
+ estado   varchar[] := '{}';
+ contador integer; 
+BEGIN 
+	estado[0]  := 'ac';    -- Acre
+	estado[1]  := 'al';    -- Alagoas
+	estado[2]  := 'ap';    -- Amapa
+	estado[3]  := 'am';    -- amazonas
+	estado[4]  := 'ba';    -- Bahia
+	estado[5]  := 'ce';    -- Ceara
+	estado[6]  := 'df';    -- Distrito Federal
+	estado[7]  := 'es';    -- EspÌrito Santo
+	estado[8]  := 'go';    -- Goias
+	estado[9]  := 'ma';    -- Maranhao
+	estado[10] := 'mt';    -- Mato Grosso
+	estado[11] := 'ms';    -- Mato Grosso do Sul
+	estado[12] := 'mg';    -- Minas Gerais
+	estado[13] := 'pa';    -- Para 
+	estado[14] := 'pb';    -- Paraiba
+	estado[15] := 'pe';    -- Pernambuco
+	estado[16] := 'pi';    -- Piaui
+	estado[17] := 'pr';    -- Parana
+	estado[18] := 'rj';    -- Rio de Janeiro
+	estado[19] := 'rn';    -- Rio Grande do Norte
+	estado[20] := 'rs';    -- Rio Grande do Sul
+	estado[21] := 'ro';    -- Rondonia
+	estado[22] := 'rr';    -- Roraima
+	estado[23] := 'sc';    -- Santa Catarina
+	estado[24] := 'sp';    -- Sao Paulo
+	estado[25] := 'se';    -- Sergipe
+	estado[26] := 'to';    -- Tocantins
+ 
+   FOR contador IN 0..26 LOOP
+      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.emigracao-internacional.censo2010.'|| estado[contador] ||'" ';
+      execute 'CREATE SCHEMA "microdados.amostra.emigracao-internacional.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
+      --Raise Notice estado ;
+   END LOOP;
+END
+$criacao_esquemas_estados_emigracao_internacional$
+;
+
+DROP SCHEMA IF EXISTS "microdados.amostra.mortalidade.censo2010";
+
+CREATE SCHEMA "microdados.amostra.mortalidade.censo2010"
+  AUTHORIZATION "administrador-banco";
+
+DO
+$criacao_esquemas_estados_mortalidadel$
+DECLARE
+ estado   varchar[] := '{}';
+ contador integer; 
+BEGIN 
+	estado[0]  := 'ac';    -- Acre
+	estado[1]  := 'al';    -- Alagoas
+	estado[2]  := 'ap';    -- Amapa
+	estado[3]  := 'am';    -- amazonas
+	estado[4]  := 'ba';    -- Bahia
+	estado[5]  := 'ce';    -- Ceara
+	estado[6]  := 'df';    -- Distrito Federal
+	estado[7]  := 'es';    -- EspÌrito Santo
+	estado[8]  := 'go';    -- Goias
+	estado[9]  := 'ma';    -- Maranhao
+	estado[10] := 'mt';    -- Mato Grosso
+	estado[11] := 'ms';    -- Mato Grosso do Sul
+	estado[12] := 'mg';    -- Minas Gerais
+	estado[13] := 'pa';    -- Para 
+	estado[14] := 'pb';    -- Paraiba
+	estado[15] := 'pe';    -- Pernambuco
+	estado[16] := 'pi';    -- Piaui
+	estado[17] := 'pr';    -- Parana
+	estado[18] := 'rj';    -- Rio de Janeiro
+	estado[19] := 'rn';    -- Rio Grande do Norte
+	estado[20] := 'rs';    -- Rio Grande do Sul
+	estado[21] := 'ro';    -- Rondonia
+	estado[22] := 'rr';    -- Roraima
+	estado[23] := 'sc';    -- Santa Catarina
+	estado[24] := 'sp';    -- Sao Paulo
+	estado[25] := 'se';    -- Sergipe
+	estado[26] := 'to';    -- Tocantins
+ 
+   FOR contador IN 0..26 LOOP
+      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.mortalidade.censo2010.'|| estado[contador] ||'" ';
+      execute 'CREATE SCHEMA "microdados.amostra.mortalidade.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
+      --Raise Notice estado ;
+   END LOOP;
+END
+$criacao_esquemas_estados_mortalidadel$
+;
+
+DROP SCHEMA IF EXISTS "microdados.amostra.pessoas.censo2010";
+
+CREATE SCHEMA "microdados.amostra.pessoas.censo2010"
+  AUTHORIZATION "administrador-banco";
+
+DO
+$criacao_esquemas_estados_pessoas$
+DECLARE
+ estado   varchar[] := '{}';
+ contador integer; 
+BEGIN 
+	estado[0]  := 'ac';    -- Acre
+	estado[1]  := 'al';    -- Alagoas
+	estado[2]  := 'ap';    -- Amapa
+	estado[3]  := 'am';    -- amazonas
+	estado[4]  := 'ba';    -- Bahia
+	estado[5]  := 'ce';    -- Ceara
+	estado[6]  := 'df';    -- Distrito Federal
+	estado[7]  := 'es';    -- EspÌrito Santo
+	estado[8]  := 'go';    -- Goias
+	estado[9]  := 'ma';    -- Maranhao
+	estado[10] := 'mt';    -- Mato Grosso
+	estado[11] := 'ms';    -- Mato Grosso do Sul
+	estado[12] := 'mg';    -- Minas Gerais
+	estado[13] := 'pa';    -- Para 
+	estado[14] := 'pb';    -- Paraiba
+	estado[15] := 'pe';    -- Pernambuco
+	estado[16] := 'pi';    -- Piaui
+	estado[17] := 'pr';    -- Parana
+	estado[18] := 'rj';    -- Rio de Janeiro
+	estado[19] := 'rn';    -- Rio Grande do Norte
+	estado[20] := 'rs';    -- Rio Grande do Sul
+	estado[21] := 'ro';    -- Rondonia
+	estado[22] := 'rr';    -- Roraima
+	estado[23] := 'sc';    -- Santa Catarina
+	estado[24] := 'sp';    -- Sao Paulo
+	estado[25] := 'se';    -- Sergipe
+	estado[26] := 'to';    -- Tocantins
+ 
+   FOR contador IN 0..26 LOOP
+      execute 'DROP SCHEMA IF EXISTS "microdados.amostra.pessoas.censo2010.'|| estado[contador] ||'" ';
+      execute 'CREATE SCHEMA "microdados.amostra.pessoas.censo2010.'|| estado[contador] ||'" AUTHORIZATION "administrador-banco"';
+      --Raise Notice estado ;
+   END LOOP;
+END
+$criacao_esquemas_estados_pessoas$
+;
+
+
+DROP EXTENSION IF EXISTS postgis;
+CREATE EXTENSION postgis SCHEMA public VERSION "2.5.3";
+
+DROP TABLE IF EXISTS "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1";
+CREATE TABLE "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1"
+(
+  chave integer,
+  id serial,
+  geom geometry(MultiPolygon,4674),
+  count numeric,
+  area_pond character varying(254),
+  pesquisa varchar(100),
+  ano_ref date,
+  hora_impor timestamp
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE "microdados.amostra.domicilios.censo2010"."censo2010area_de_ponderacao1"
+  OWNER TO "administrador-banco";
+  
+```
 
 
 ## Anexo I - IBGE - CENSO 2010 - Agregados por Setor
-### Tabela1 - Endere√ßos do site - Download arquivos Agregados por setor - acesso em 2019/09/02
+### Tabela1 - EndereÁos do site - Download arquivos Agregados por setor - acesso em 2019/09/02
 
-| **Arquivos** | **site** | **Endere√ßo direto** |
+| **Arquivos** | **site** | **EndereÁo direto** |
 |------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Documentacao_Agregado_dos_Setores_20180416.zip | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/Documentacao_Agregado_dos_Setores_20180416.zip |
 | 1_Atualizacoes_20171016.txt | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&amp;t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_do_Universo/Agregados_por_Setores_Censitarios/1_Atualizacoes_20171016.txt |
@@ -2753,47 +1564,47 @@ CREATE INDEX indice_pessoas_final
 
 ### Tabela1 - Agregados por setor - Tabela `Basico`
 
-| item | nome_original | nome_banco | Descri√ß√£o |
+| item | nome_original | nome_banco | DescriÁ„o |
 |------|---------------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | Cod_setor | **geocodigo** | identificador |
-| 2 | Cod_Grandes Regi√µes | id_grandes_regioes | Codigo das Grandes Regi√µes |
-| 3 | Nome_Grande_Regiao | nome_grandes_regioes | Nome da Grande Regi√£o |
-| 4 | Cod_UF | id_uf | Codigo da Unidade da Federa√ß√£o |
-| 5 | Nome_da_UF | nome_uf | Nome da Unidade da Federa√ß√£o |
-| 6 | Cod_meso | id_mesoregiao | Codigo da Meso-Regi√£o |
-| 7 | Nome_da_meso | nome_mesoregiao | Nome da Meso-Regi√£o |
-| 8 | Cod_micro | id_microregiao | Codigo da Micro-Regi√£o |
-| 9 | Nome_da_micro | nome_microregiao | Nome da Micro-Regi√£o |
+| 2 | Cod_Grandes Regiıes | id_grandes_regioes | Codigo das Grandes Regiıes |
+| 3 | Nome_Grande_Regiao | nome_grandes_regioes | Nome da Grande Regi„o |
+| 4 | Cod_UF | id_uf | Codigo da Unidade da FederaÁ„o |
+| 5 | Nome_da_UF | nome_uf | Nome da Unidade da FederaÁ„o |
+| 6 | Cod_meso | id_mesoregiao | Codigo da Meso-Regi„o |
+| 7 | Nome_da_meso | nome_mesoregiao | Nome da Meso-Regi„o |
+| 8 | Cod_micro | id_microregiao | Codigo da Micro-Regi„o |
+| 9 | Nome_da_micro | nome_microregiao | Nome da Micro-Regi„o |
 | 10 | Cod_RM | id_regiao_metropolitana | Codigo RIDE |
 | 11 | Nome_da_RM | nome_regiao_metropolitana | Nome RIDE |
-| 12 | Cod_municipio | id_municipio | Por√ß√£o do Geocodigo referente ao munic√≠pio |
-| 13 | Nome_do_municipio | nome_municipio | Nome do Munic√≠pio |
-| 14 | Cod_distrito | id_distrito | Por√ß√£o do Geocodigo referente ao distrito |
+| 12 | Cod_municipio | id_municipio | PorÁ„o do Geocodigo referente ao municÌpio |
+| 13 | Nome_do_municipio | nome_municipio | Nome do MunicÌpio |
+| 14 | Cod_distrito | id_distrito | PorÁ„o do Geocodigo referente ao distrito |
 | 15 | Nome_do_distrito | nome_distrito | Nome do Distrito |
-| 16 | Cod_subdistrito | id_subdistrito | Por√ß√£o do Geocodigo referente ao subdistrito |
+| 16 | Cod_subdistrito | id_subdistrito | PorÁ„o do Geocodigo referente ao subdistrito |
 | 17 | Nome_do_subdistrito | nome_subdistrito | Nome do Subdistrito |
 | 18 | Cod_bairro | id_bairro | codigo agregado ao bairro |
 | 19 | Nome_do_bairro | nome_bairro | Nome do Bairro |
-| 20 | Situacao_setor | situa√ß√£o_setor | - Situa√ß√£o urbana - codigos: 1, 2 e 3 - 1- area urbanizada de cidade ou vila - 2- area n√£o-urbanizada de cidade ou vila - 3- area urbana isolada - Situa√ß√£o rural - codigos: 4, 5, 6, 7 e 8 - 4- Aglomerado rural de extens√£o urbana - 5- Aglomerado rural isolado - povoado - 6- Aglomerado rural isolado - n√∫cleo - 7- Aglomerado rural isolado - outros aglomerados - 8- Zona rural, exclusive aglomerado rural |
+| 20 | Situacao_setor | situaÁ„o_setor | - SituaÁ„o urbana - codigos: 1, 2 e 3 - 1- area urbanizada de cidade ou vila - 2- area n„o-urbanizada de cidade ou vila - 3- area urbana isolada - SituaÁ„o rural - codigos: 4, 5, 6, 7 e 8 - 4- Aglomerado rural de extens„o urbana - 5- Aglomerado rural isolado - povoado - 6- Aglomerado rural isolado - n˙cleo - 7- Aglomerado rural isolado - outros aglomerados - 8- Zona rural, exclusive aglomerado rural |
 | 21 | Tipo_setor | tipo_setor | Tipo do Setor |
-| 22 | V001 | **V001** | Domic√≠lios particulares  permanentes ou pessoas responsaveis por  domic√≠lios particulares permanentes |
-| 23 | V002 | **V002** | Moradores em domic√≠lios  particulares permanentes ou popula√ß√£o residente  em domic√≠lios particulares permanentes |
-| 24 | V003 | **V003** | M√©dia do n√∫mero de moradores em domic√≠lios particulares  permanentes (obtida pela  divis√£o de Var2 por Var1) |
-| 25 | V004 | **V004** | Vari√¢ncia do n√∫mero de  moradores em domic√≠lios particulares permanentes |
-| 26 | V005 | **V005** | Valor do rendimento nominal  m√©dio mensal das pessoas responsaveis por domic√≠lios particulares permanentes  (com e sem rendimento) |
-| 27 | V006 | **V006** | Vari√¢ncia do rendimento  nominal mensal das pessoas  responsaveis por domic√≠lios  particulares permanentes  (com e sem rendimento) |
-| 28 | V007 | **V007** | Valor do rendimento nominal m√©dio mensal das pessoas  responsaveis por domic√≠lios  particulares permanentes  (com rendimento) |
-| 29 | V008 | **V008** | Vari√¢ncia do rendimento nominal mensal das pessoas responsaveis  por domic√≠lios particulares  permanentes (com rendimento) |
-| 30 | V009 | **V009** | Valor do rendimento nominal m√©dio  mensal das pessoas de 10 anos ou  mais de idade (com e sem rendimento) |
-| 31 | V010 | **V010** | Vari√¢ncia do rendimento nominal  mensal das pessoas de 10 anos ou  mais de idade (com e sem rendimento) |
-| 32 | V011 | **V011** | Valor do rendimento nominal m√©dio  mensal das pessoas de 10 anos ou  mais de idade (com rendimento) |
-| 33 | V012 | **V012** | Vari√¢ncia do rendimento nominal mensal  das pessoas de 10 anos ou mais de idade (com rendimento) |
+| 22 | V001 | **V001** | DomicÌlios particulares  permanentes ou pessoas responsaveis por  domicÌlios particulares permanentes |
+| 23 | V002 | **V002** | Moradores em domicÌlios  particulares permanentes ou populaÁ„o residente  em domicÌlios particulares permanentes |
+| 24 | V003 | **V003** | MÈdia do n˙mero de moradores em domicÌlios particulares  permanentes (obtida pela  divis„o de Var2 por Var1) |
+| 25 | V004 | **V004** | Vari‚ncia do n˙mero de  moradores em domicÌlios particulares permanentes |
+| 26 | V005 | **V005** | Valor do rendimento nominal  mÈdio mensal das pessoas responsaveis por domicÌlios particulares permanentes  (com e sem rendimento) |
+| 27 | V006 | **V006** | Vari‚ncia do rendimento  nominal mensal das pessoas  responsaveis por domicÌlios  particulares permanentes  (com e sem rendimento) |
+| 28 | V007 | **V007** | Valor do rendimento nominal mÈdio mensal das pessoas  responsaveis por domicÌlios  particulares permanentes  (com rendimento) |
+| 29 | V008 | **V008** | Vari‚ncia do rendimento nominal mensal das pessoas responsaveis  por domicÌlios particulares  permanentes (com rendimento) |
+| 30 | V009 | **V009** | Valor do rendimento nominal mÈdio  mensal das pessoas de 10 anos ou  mais de idade (com e sem rendimento) |
+| 31 | V010 | **V010** | Vari‚ncia do rendimento nominal  mensal das pessoas de 10 anos ou  mais de idade (com e sem rendimento) |
+| 32 | V011 | **V011** | Valor do rendimento nominal mÈdio  mensal das pessoas de 10 anos ou  mais de idade (com rendimento) |
+| 33 | V012 | **V012** | Vari‚ncia do rendimento nominal mensal  das pessoas de 10 anos ou mais de idade (com rendimento) |
 
 
 ## Anexo II - IBGE - CENSO 2010 - Microdados da Amostra
-### Tabela1 - Endere√ßos do site - Download arquivos Microdados da Amostra - acesso em 2019/09/02
+### Tabela1 - EndereÁos do site - Download arquivos Microdados da Amostra - acesso em 2019/09/02
 
-| **Arquivos** | **site** | **Endere√ßo direto** |
+| **Arquivos** | **site** | **EndereÁo direto** |
 |:------------:|:-------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|
 | RO.zip | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_Gerais_da_Amostra/Microdados/RO.zip, |
 | AC.zip | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&amp;t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_Gerais_da_Amostra/Microdados/AC.zip, |
@@ -2824,116 +1635,116 @@ CREATE INDEX indice_pessoas_final
 | GO.zip | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&amp;t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_Gerais_da_Amostra/Microdados/GO.zip, |
 | DF.zip | https://www.ibge.gov.br/estatisticas/sociais/populacao/9662-censo-demografico-2010.html?edicao=10410&amp;t=resultados | ftp://ftp.ibge.gov.br/Censos/Censo_Demografico_2010/Resultados_Gerais_da_Amostra/Microdados/DF.zip |
 
-### Tabela2-Microdados da Amostra - Domic√≠lios:
-| vari√°vel | nome | descri√ß√£o |
+### Tabela2-Microdados da Amostra - DomicÌlios:
+| vari·vel | nome | descriÁ„o |
 |----------|--------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| v0001 | unidade da federa√ß√£o: | 11- Rond√¥nia 12- acre 13- amazonas 14- Roraima 15- par√° 16- amap√° 17- Tocantins 21- maranh√£o 22- Piau√≠ 23- cear√° 24- rio grande do norte 25- para√≠ba 26- Pernambuco 27- alagoas 28- Sergipe 29- bahia 31- minas gerais 32- esp√≠rito santo 33- rio de janeiro 35- s√£o Paulo 41- paran√° 42- santa catarina 43- rio grande do sul 50- mato grosso do sul 51- mato grosso 52- goi√°s 53- distrito federal |
-| v0002 | c√≥digo do munic√≠pio |  |
-| v0011 | √°rea de pondera√ß√£o |  |
+| v0001 | unidade da federaÁ„o: | 11- RondÙnia 12- acre 13- amazonas 14- Roraima 15- par· 16- amap· 17- Tocantins 21- maranh„o 22- PiauÌ 23- cear· 24- rio grande do norte 25- paraÌba 26- Pernambuco 27- alagoas 28- Sergipe 29- bahia 31- minas gerais 32- espÌrito santo 33- rio de janeiro 35- s„o Paulo 41- paran· 42- santa catarina 43- rio grande do sul 50- mato grosso do sul 51- mato grosso 52- goi·s 53- distrito federal |
+| v0002 | cÛdigo do municÌpio |  |
+| v0011 | ·rea de ponderaÁ„o |  |
 | v0300 | controle |  |
 | v0010 | peso amostral |  |
-| v1001 | regi√£o geogr√°fica: | 1- regi√£o norte (uf=11 a 17) 2- regi√£o nordeste (uf=21 a 29)   3- regi√£o sudeste (uf=31 a 33 e 35) 4- regi√£o sul (uf=41 a 43) 5- regi√£o centro-oeste (uf=50 a 53) |
-| v1002 | c√≥digo da mesorregi√£o: | a rela√ß√£o de c√≥digos encontra-se no arquivo: |
-| v1003 | c√≥digo da microrregi√£o: | a rela√ß√£o de c√≥digos encontra-se no arquivo: |
-| v1004 | c√≥digo da regi√£o metropolitana:a rela√ß√£o de c√≥digos encontra-se no arquivo: |  |
-| v1006 | situa√ß√£o do domic√≠lio: | 1- urbana 2- rural |
-| v4001 | esp√©cie de unidade visitada: | 01- domic√≠lio particular permanente ocupado  02- domic√≠lio particular permanente ocupado sem entrevista realizada  05- domic√≠lio particular improvisado ocupado  06- domic√≠lio coletivo com morador |
-| v4002 | tipo de esp√©cie: | 11- casa 12- casa de vila ou em condom√≠nio 13- apartamento 14- habita√ß√£o em: casa de c√¥modos, corti√ßo ou cabe√ßa de porco 15- oca ou maloca  51- tenda ou barraca 52- dentro de estabelecimento 53- outro (vag√£o, trailer, gruta, etc) 61- asilo, orfanato e similares  com morador 62- hotel, pens√£o e similares com morador 63- alojamento de trabalhadores com morador 64- penitenci√°ria, pres√≠dio ou casa de deten√ß√£o com morador 65- outro com morador |
-| v0201 | domic√≠lio, condi√ß√£o de ocupa√ß√£o: | 1- pr√≥prio de algum morador - j√° pago 2- pr√≥prio de algum morador - ainda pagando 3- alugado 4- cedido por empregador 5- cedido de outra forma 6- outra condi√ß√£obranco |
+| v1001 | regi„o geogr·fica: | 1- regi„o norte (uf=11 a 17) 2- regi„o nordeste (uf=21 a 29)   3- regi„o sudeste (uf=31 a 33 e 35) 4- regi„o sul (uf=41 a 43) 5- regi„o centro-oeste (uf=50 a 53) |
+| v1002 | cÛdigo da mesorregi„o: | a relaÁ„o de cÛdigos encontra-se no arquivo: |
+| v1003 | cÛdigo da microrregi„o: | a relaÁ„o de cÛdigos encontra-se no arquivo: |
+| v1004 | cÛdigo da regi„o metropolitana:a relaÁ„o de cÛdigos encontra-se no arquivo: |  |
+| v1006 | situaÁ„o do domicÌlio: | 1- urbana 2- rural |
+| v4001 | espÈcie de unidade visitada: | 01- domicÌlio particular permanente ocupado  02- domicÌlio particular permanente ocupado sem entrevista realizada  05- domicÌlio particular improvisado ocupado  06- domicÌlio coletivo com morador |
+| v4002 | tipo de espÈcie: | 11- casa 12- casa de vila ou em condomÌnio 13- apartamento 14- habitaÁ„o em: casa de cÙmodos, cortiÁo ou cabeÁa de porco 15- oca ou maloca  51- tenda ou barraca 52- dentro de estabelecimento 53- outro (vag„o, trailer, gruta, etc) 61- asilo, orfanato e similares  com morador 62- hotel, pens„o e similares com morador 63- alojamento de trabalhadores com morador 64- penitenci·ria, presÌdio ou casa de detenÁ„o com morador 65- outro com morador |
+| v0201 | domicÌlio, condiÁ„o de ocupaÁ„o: | 1- prÛprio de algum morador - j· pago 2- prÛprio de algum morador - ainda pagando 3- alugado 4- cedido por empregador 5- cedido de outra forma 6- outra condiÁ„obranco |
 | v2011 | valor do aluguel (em reais) |  |
-| v2012 | aluguel em n¬∫ de sal√°rios m√≠nimos |  |
-| v0202 | material predominante, paredes externas: | 1- alvenaria com revestimento 2- alvenaria sem revestimento 3- madeira apropriada para constru√ß√£o (aparelhada) 4- taipa revestida 5- taipa n√£o revestida 6- madeira aproveitada 7- palha8- outro mat√©ria l9- sem paredebranco |
-| v0203 | c√¥modos, n√∫mero: | - branco- 1 a 30 |
-| v6203 | densidade de morador/c√¥modo |  |
-| v0204 | c√¥modos como dormit√≥rio, n√∫mero: | - branco- 1 a 15 |
-| v6204 | densidade de morador / dormit√≥rio |  |
-| v0205 | banheiros de uso exclusivo, n√∫mero: | 0- zero banheiros 1- um banheiro 2- dois banheiros 3- tr√™s banheiros 4- quatro banheiros 5- cinco banheiros 6- seis banheiros 7- sete banheiros 8- oito banheiros 9- nove ou mais banheirosbranco |
-| v0206 | sanit√°rio ou buraco para deje√ß√µes, exist√™ncia: | 1- sim 2- n√£obranco |
-| v0207 | esgotamento sanit√°rio, tipo: | 1- rede geral de esgoto ou pluvial 2- fossa s√©ptica 3- fossa rudimentar 4- vala5- rio, lago ou mar 6- outro branco |
-| v0208 | abastecimento de √°gua, forma: | 01- rede geral de distribui√ß√£o 02- po√ßo ou nascente na propriedade 03- po√ßo ou nascente fora da propriedade 04- carro-pipa 05- √°gua da chuva armazenada em cisterna 06- √°gua da chuva armazenada de outra forma 07- rios, a√ßudes, lagos e igarap√©s 08- outra  09- po√ßo ou nascente na aldeia 10- po√ßo ou nascente fora da aldeiabranco |
-| v0209 | abastecimento de √°gua, canaliza√ß√£o: | 1- sim, em pelo menos um c√¥modo 2- sim, s√≥ na propriedade ou terreno 3- n√£obranco |
-| v0210 | lixo, destino: | 1- coletado diretamente por servi√ßo de limpeza 2- colocado em ca√ßamba de servi√ßo de limpeza 3- queimado (na propriedade) 4- enterrado (na propriedade) 5- jogado em terreno baldio ou logradouro 6- jogado em rio, lago ou mar 7- tem outro destinobranco |
-| v0211 | energia el√©trica, exist√™ncia: | 1- sim, de companhia distribuidora 2- sim, de outras fontes 3- n√£o existe energia el√©tricabranco |
-| v0212 | exist√™ncia de medidor ou rel√≥gio, energia el√©trica, companhia distribuidora: | 1- sim, de uso exclusivo 2- sim, de uso comum  3- n√£o tem medidor ou rel√≥giobranco |
-| v0213 | r√°dio, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0214 | televis√£o, exist√™ncia: | 1-sim 2-n√£o branco |
-| v0215 | m√°quina de lavar roupa, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0216 | geladeira, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0217 | telefone celular, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0218 | telefone fixo, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0219 | microcomputador, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0220 | microcomputador com acesso √† internet, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0221 | motocicleta para uso particular, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0222 | autom√≥vel para uso particular, exist√™ncia: | 1- sim 2- n√£o branco |
-| v0301 | alguma pessoa que morava com voc√™(s) estava morando em outro pa√≠s em 31 de julho de 2010: | 1- sim 2- n√£o branco |
-| v0401 | quantas pessoas moravam neste domic√≠lio em 31 de julho de 2010 |  |
-| v0402 | a responsabilidade pelo domic√≠lio √© de: | 1- apenas um morador 2- mais de um morador 9- ignoradobranco |
-| v0701 | de agosto de 2009 a julho de 2010, faleceu alguma pessoa que morava com voc√™(s)  (inclusive crian√ßas rec√©m-nascidas e idosos): | 1- sim 2- n√£o branco |
+| v2012 | aluguel em n∫ de sal·rios mÌnimos |  |
+| v0202 | material predominante, paredes externas: | 1- alvenaria com revestimento 2- alvenaria sem revestimento 3- madeira apropriada para construÁ„o (aparelhada) 4- taipa revestida 5- taipa n„o revestida 6- madeira aproveitada 7- palha8- outro matÈria l9- sem paredebranco |
+| v0203 | cÙmodos, n˙mero: | - branco- 1 a 30 |
+| v6203 | densidade de morador/cÙmodo |  |
+| v0204 | cÙmodos como dormitÛrio, n˙mero: | - branco- 1 a 15 |
+| v6204 | densidade de morador / dormitÛrio |  |
+| v0205 | banheiros de uso exclusivo, n˙mero: | 0- zero banheiros 1- um banheiro 2- dois banheiros 3- trÍs banheiros 4- quatro banheiros 5- cinco banheiros 6- seis banheiros 7- sete banheiros 8- oito banheiros 9- nove ou mais banheirosbranco |
+| v0206 | sanit·rio ou buraco para dejeÁıes, existÍncia: | 1- sim 2- n„obranco |
+| v0207 | esgotamento sanit·rio, tipo: | 1- rede geral de esgoto ou pluvial 2- fossa sÈptica 3- fossa rudimentar 4- vala5- rio, lago ou mar 6- outro branco |
+| v0208 | abastecimento de ·gua, forma: | 01- rede geral de distribuiÁ„o 02- poÁo ou nascente na propriedade 03- poÁo ou nascente fora da propriedade 04- carro-pipa 05- ·gua da chuva armazenada em cisterna 06- ·gua da chuva armazenada de outra forma 07- rios, aÁudes, lagos e igarapÈs 08- outra  09- poÁo ou nascente na aldeia 10- poÁo ou nascente fora da aldeiabranco |
+| v0209 | abastecimento de ·gua, canalizaÁ„o: | 1- sim, em pelo menos um cÙmodo 2- sim, sÛ na propriedade ou terreno 3- n„obranco |
+| v0210 | lixo, destino: | 1- coletado diretamente por serviÁo de limpeza 2- colocado em caÁamba de serviÁo de limpeza 3- queimado (na propriedade) 4- enterrado (na propriedade) 5- jogado em terreno baldio ou logradouro 6- jogado em rio, lago ou mar 7- tem outro destinobranco |
+| v0211 | energia elÈtrica, existÍncia: | 1- sim, de companhia distribuidora 2- sim, de outras fontes 3- n„o existe energia elÈtricabranco |
+| v0212 | existÍncia de medidor ou relÛgio, energia elÈtrica, companhia distribuidora: | 1- sim, de uso exclusivo 2- sim, de uso comum  3- n„o tem medidor ou relÛgiobranco |
+| v0213 | r·dio, existÍncia: | 1- sim 2- n„o branco |
+| v0214 | televis„o, existÍncia: | 1-sim 2-n„o branco |
+| v0215 | m·quina de lavar roupa, existÍncia: | 1- sim 2- n„o branco |
+| v0216 | geladeira, existÍncia: | 1- sim 2- n„o branco |
+| v0217 | telefone celular, existÍncia: | 1- sim 2- n„o branco |
+| v0218 | telefone fixo, existÍncia: | 1- sim 2- n„o branco |
+| v0219 | microcomputador, existÍncia: | 1- sim 2- n„o branco |
+| v0220 | microcomputador com acesso ‡ internet, existÍncia: | 1- sim 2- n„o branco |
+| v0221 | motocicleta para uso particular, existÍncia: | 1- sim 2- n„o branco |
+| v0222 | automÛvel para uso particular, existÍncia: | 1- sim 2- n„o branco |
+| v0301 | alguma pessoa que morava com vocÍ(s) estava morando em outro paÌs em 31 de julho de 2010: | 1- sim 2- n„o branco |
+| v0401 | quantas pessoas moravam neste domicÌlio em 31 de julho de 2010 |  |
+| v0402 | a responsabilidade pelo domicÌlio È de: | 1- apenas um morador 2- mais de um morador 9- ignoradobranco |
+| v0701 | de agosto de 2009 a julho de 2010, faleceu alguma pessoa que morava com vocÍ(s)  (inclusive crianÁas recÈm-nascidas e idosos): | 1- sim 2- n„o branco |
 | v6529 | rendimento mensal domiciliar em julho de 2010 |  |
-| v6530 | rendimento domiciliar, sal√°rios m√≠nimos, em julho de 2010 |  |
+| v6530 | rendimento domiciliar, sal·rios mÌnimos, em julho de 2010 |  |
 | v6531 | rendimento domiciliar per capita em julho de 2010 |  |
-| v6532 | rendimento domiciliar per capita, em n¬∫ de sal√°rios m√≠nimos, em julho de 2010 |  |
-| v6600 | esp√©cie da unidade dom√©stica | 1- unipessoal 2- nuclear 3- estendida 4- compostabranco (domic√≠lio coletivo) |
-| v6210 |  adequa√ß√£o da moradia | 1- adequada 2- semi-adequada 3- inadequadabranco |
-| m0201 | marca de imputa√ß√£o |  |
-| m2011 | marca de imputa√ß√£o |  |
-| m0202 | marca de imputa√ß√£o |  |
-| m0203 | marca de imputa√ß√£o |  |
-| m0204 | marca de imputa√ß√£o |  |
-| m0205 | marca de imputa√ß√£o |  |
-| m0206 | marca de imputa√ß√£o |  |
-| m0207 | marca de imputa√ß√£o |  |
-| m0208 | marca de imputa√ß√£o |  |
-| m0209 | marca de imputa√ß√£o |  |
-| m0210 | marca de imputa√ß√£o |  |
-| m0211 | marca de imputa√ß√£o |  |
-| m0212 | marca de imputa√ß√£o |  |
-| m0213 | marca de imputa√ß√£o |  |
-| m0214 | marca de imputa√ß√£o |  |
-| m0215 | marca de imputa√ß√£o |  |
-| m0216 | marca de imputa√ß√£o |  |
-| m0217 | marca de imputa√ß√£o |  |
-| m0218 | marca de imputa√ß√£o |  |
-| m0219 | marca de imputa√ß√£o |  |
-| m0220 | marca de imputa√ß√£o |  |
-| m0221 | marca de imputa√ß√£o |  |
-| m0222 | marca de imputa√ß√£o |  |
-| m0301 | marca de imputa√ß√£o |  |
-| m0401 | marca de imputa√ß√£o |  |
-| m0402 | marca de imputa√ß√£o |  |
-| m0701 | marca de imputa√ß√£o |  |
-| v1005 | situa√ß√£o do setor 1- masculino2- feminino | 1 - √°rea urbanizada 2 - √°rea n√£o urbanizada 3 - √°rea urbanizada isolada 4 - √°rea rural de extens√£o urbana 5 - aglomerado rural (povoado) 6 - aglomerado rural (n√∫cleo) 7 - aglomerado rural (outros) 8 - √°rea rural exclusive aglomerado rural |
+| v6532 | rendimento domiciliar per capita, em n∫ de sal·rios mÌnimos, em julho de 2010 |  |
+| v6600 | espÈcie da unidade domÈstica | 1- unipessoal 2- nuclear 3- estendida 4- compostabranco (domicÌlio coletivo) |
+| v6210 |  adequaÁ„o da moradia | 1- adequada 2- semi-adequada 3- inadequadabranco |
+| m0201 | marca de imputaÁ„o |  |
+| m2011 | marca de imputaÁ„o |  |
+| m0202 | marca de imputaÁ„o |  |
+| m0203 | marca de imputaÁ„o |  |
+| m0204 | marca de imputaÁ„o |  |
+| m0205 | marca de imputaÁ„o |  |
+| m0206 | marca de imputaÁ„o |  |
+| m0207 | marca de imputaÁ„o |  |
+| m0208 | marca de imputaÁ„o |  |
+| m0209 | marca de imputaÁ„o |  |
+| m0210 | marca de imputaÁ„o |  |
+| m0211 | marca de imputaÁ„o |  |
+| m0212 | marca de imputaÁ„o |  |
+| m0213 | marca de imputaÁ„o |  |
+| m0214 | marca de imputaÁ„o |  |
+| m0215 | marca de imputaÁ„o |  |
+| m0216 | marca de imputaÁ„o |  |
+| m0217 | marca de imputaÁ„o |  |
+| m0218 | marca de imputaÁ„o |  |
+| m0219 | marca de imputaÁ„o |  |
+| m0220 | marca de imputaÁ„o |  |
+| m0221 | marca de imputaÁ„o |  |
+| m0222 | marca de imputaÁ„o |  |
+| m0301 | marca de imputaÁ„o |  |
+| m0401 | marca de imputaÁ„o |  |
+| m0402 | marca de imputaÁ„o |  |
+| m0701 | marca de imputaÁ„o |  |
+| v1005 | situaÁ„o do setor 1- masculino2- feminino | 1 - ·rea urbanizada 2 - ·rea n„o urbanizada 3 - ·rea urbanizada isolada 4 - ·rea rural de extens„o urbana 5 - aglomerado rural (povoado) 6 - aglomerado rural (n˙cleo) 7 - aglomerado rural (outros) 8 - ·rea rural exclusive aglomerado rural |
 
 ### Tabela1 - Mortalidade
 
 
-### Tabela1 - Emigra√ß√£o
+### Tabela1 - EmigraÁ„o
 
-| var | nome | descri√ß√£o |
+| var | nome | descriÁ„o |
 |-------|-----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| V0001 | unidade da federa√ß√£o: | 11- rond√¥nia12- acre13- amazonas14- roraima15- par√°16- amap√°17- tocantins21- maranh√£o22- piau√≠23- cear√°24- rio grande do norte25- para√≠ba26- pernambuco27- alagoas28- sergipe29- bahia31- minas gerais32- esp√≠rito santo33- rio de janeiro35- s√£o paulo41- paran√°42- santa catarina43- rio grande do sul50- mato grosso do sul51- mato grosso52- goi√°s53- distrito federal |
-| V0002 | c√≥digo do munic√≠pio |  |
-| V0011 | √°rea de pondera√ß√£o |  |
+| V0001 | unidade da federaÁ„o: | 11- rondÙnia12- acre13- amazonas14- roraima15- par·16- amap·17- tocantins21- maranh„o22- piauÌ23- cear·24- rio grande do norte25- paraÌba26- pernambuco27- alagoas28- sergipe29- bahia31- minas gerais32- espÌrito santo33- rio de janeiro35- s„o paulo41- paran·42- santa catarina43- rio grande do sul50- mato grosso do sul51- mato grosso52- goi·s53- distrito federal |
+| V0002 | cÛdigo do municÌpio |  |
+| V0011 | ·rea de ponderaÁ„o |  |
 | V0300 | controle |  |
 | V0010 | peso amostral |  |
-| V1001 | regi√£o geogr√°fica: | 1- regi√£o norte (uf=11 a 17)2- regi√£o nordeste (uf=21 a 29)  3- regi√£o sudeste (uf=31 a 33 e 35)4- regi√£o sul (uf=41 a 43)5- regi√£o centro-oeste (uf=50 a 53) |
-| V1002 | c√≥digo da mesorregi√£o: | a rela√ß√£o de c√≥digos encontra-se no arquivo: |
-| V1003 | c√≥digo da microrregi√£o: | a rela√ß√£o de c√≥digos encontra-se no arquivo: |
-| V1004 | c√≥digo da  regi√£o metropolitana: | a rela√ß√£o de c√≥digos encontra-se no arquivo: |
-| V1006 | situa√ß√£o do domic√≠lio: | 1- urbana2- rural |
+| V1001 | regi„o geogr·fica: | 1- regi„o norte (uf=11 a 17)2- regi„o nordeste (uf=21 a 29)  3- regi„o sudeste (uf=31 a 33 e 35)4- regi„o sul (uf=41 a 43)5- regi„o centro-oeste (uf=50 a 53) |
+| V1002 | cÛdigo da mesorregi„o: | a relaÁ„o de cÛdigos encontra-se no arquivo: |
+| V1003 | cÛdigo da microrregi„o: | a relaÁ„o de cÛdigos encontra-se no arquivo: |
+| V1004 | cÛdigo da  regi„o metropolitana: | a relaÁ„o de cÛdigos encontra-se no arquivo: |
+| V1006 | situaÁ„o do domicÌlio: | 1- urbana2- rural |
 | V0303 | sexo do emigrante: | 1- masculino2- feminino9- ignoradobranco |
 | V0304 | ano de nascimento do emigrante: | - branco- 1869 a 2010- 9999 = ignorado |
-| V0305 | ano da √∫ltima partida do emigrante: | - branco- 1869 a 2010- 9999 = ignorado |
-| V3061 | pa√≠s de resid√™ncia em 31 de julho de 2010  c√≥digo: | - branco  - a rela√ß√£o de c√≥digos encontra-se no arquivo: ???migra√ß√£o_pa√≠ses_2010 v3061 v6224 v6256 v6266 v6366 v6606.xls??? |
-| M0303 | marca de imputa√ß√£o na v0303: | 1- sim2- n√£o |
-| M0304 | marca de imputa√ß√£o na v0304: |  |
-| M0305 | marca de imputa√ß√£o na v0305: |  |
-| M3061 | marca de imputa√ß√£o na v3061: |  |
-| V1005 | situa√ß√£o do setor 1- masculino2- feminino | 1 - √°rea urbanizada2 - √°rea n√£o urbanizada3 - √°rea urbanizada isolada4 - √°rea rural de extens√£o urbana5 - aglomerado rural (povoado)6 - aglomerado rural (n√∫cleo)7 - aglomerado rural (outros)8 - √°rea rural exclusive aglomerado rural |
+| V0305 | ano da ˙ltima partida do emigrante: | - branco- 1869 a 2010- 9999 = ignorado |
+| V3061 | paÌs de residÍncia em 31 de julho de 2010  cÛdigo: | - branco  - a relaÁ„o de cÛdigos encontra-se no arquivo: ???migraÁ„o_paÌses_2010 v3061 v6224 v6256 v6266 v6366 v6606.xls??? |
+| M0303 | marca de imputaÁ„o na v0303: | 1- sim2- n„o |
+| M0304 | marca de imputaÁ„o na v0304: |  |
+| M0305 | marca de imputaÁ„o na v0305: |  |
+| M3061 | marca de imputaÁ„o na v3061: |  |
+| V1005 | situaÁ„o do setor 1- masculino2- feminino | 1 - ·rea urbanizada2 - ·rea n„o urbanizada3 - ·rea urbanizada isolada4 - ·rea rural de extens„o urbana5 - aglomerado rural (povoado)6 - aglomerado rural (n˙cleo)7 - aglomerado rural (outros)8 - ·rea rural exclusive aglomerado rural |
 
 ## Anexo III - IBGE - CENSO 2010 - Malha setorial
-### Tabela1 - Endere√ßos do site - Download shapefiles setores censitarios - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles setores censitarios - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | site | Endereco Direto |
@@ -2966,8 +1777,8 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 | to_setores_censitarios.zip | https://downloads.ibge.gov.br/downloads_geociencias.htm | ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2010/setores_censitarios_shp/to/to_setores_censitarios.zip |
 
 ## Anexo IV - IBGE - CENSO 2010 - Malha distrital
-### Tabela1 - Endere√ßos do site - Download shapefiles de distritos - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles de distritos - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | site | Endereco Direto |
@@ -3000,8 +1811,8 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 | to_distritos.zip | https://downloads.ibge.gov.br/downloads_geociencias.htm | ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2010/setores_censitarios_shp/to/to_distritos.zip |
 
 ## Anexo V - IBGE - CENSO 2010 - Malha subdistrital
-### Tabela1 - Endere√ßos do site - Download shapefiles de subdistritos - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles de subdistritos - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | site | Endereco Direto |
@@ -3034,8 +1845,8 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 | to_subdistritos.zip | https://downloads.ibge.gov.br/downloads_geociencias.htm | ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2010/setores_censitarios_shp/to/to_subdistritos.zip |
 
 ## Anexo VI - IBGE - CENSO 2010 - Malha municipal
-### Tabela1 - Endere√ßos do site - Download shapefiles de municipios - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles de municipios - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | site | Endereco Direto |
@@ -3068,8 +1879,8 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 | to_municipios.zip | https://downloads.ibge.gov.br/downloads_geociencias.htm | ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2010/setores_censitarios_shp/to/to_municipios.zip |
 
 ## Anexo VII - IBGE - CENSO 2010 - Malha unidades federativas
-### Tabela1 - Endere√ßos do site - Download shapefiles das Unidades da Federacao - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles das Unidades da Federacao - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | Site | Endereco Direto |
@@ -3102,8 +1913,8 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 | to_unidades_da_federacao.zip | https://downloads.ibge.gov.br/downloads_geociencias.htm | ftp://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/malhas_municipais/municipio_2010/to/to_unidades_da_federacao.zip |
 
 ## Anexo VIII - IBGE - CENSO 2010 - Malha areas de ponderacao
-### Tabela1 - Endere√ßos do site - Download shapefiles das Areas de Ponderacao - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+### Tabela1 - EndereÁos do site - Download shapefiles das Areas de Ponderacao - acesso em 2019/09/02
+EndereÁo para download dos arquivos geogr·ficos:
 [https://downloads.ibge.gov.br/downloads_geociencias.htm](https://downloads.ibge.gov.br/downloads_geociencias.htm)
 
 | Arquivos | Site | Endereco Direto |
@@ -3138,24 +1949,29 @@ Endere√ßo para download dos arquivos geogr√°ficos:
 
 ## Anexo IX - MMA - CNUC - Cadastro Nacional de Areas de Conservacao
 ### Tabela1 - Descricao das colunas dos shapefiles de todas as Unidades de Conservacao - acesso em 2019/09/02
-Endere√ßo para download dos arquivos geogr√°ficos:
+EndereÁo para download dos arquivos geogr·ficos:
 [http://mapas.mma.gov.br/i3geo/datadownload.htm](http://mapas.mma.gov.br/i3geo/datadownload.htm)
 
-| **item** | **nome_original** | **nome_banco** | **Descri√ß√£o** |
+| **item** | **nome_original** | **nome_banco** | **DescriÁ„o** |
 |:--------:|:-----------------:|:--------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| 1 | ID_UC0 | id | N√∫mero identificador da UC no banco de dados do CNUC |
-| 2 | NOME_UC1 | nome | Nome da Unidade de Conserva√ß√£o |
-| 3 | ID_WCMC2 | id_wcmc | N√∫mero de identifica√ß√£o da UC no banco de dados internacional de √°reas protegidas (WDPA), coordenado pela WCMC (United Nations Environment Programme - World Conservation Monitoring Centre) Informa√ß√£o da qualidade dos dados |
-| 4 | CATEGORI3 | categoria | Classifica√ß√£o da UC quanto √† categoria segundo o  SNUC (Lei n¬∫ 9.985/2000). S√£o elas: RPPN - Reserva Particular do Patrim√¥nio Natural;  APA - √Årea de Prote√ß√£o Ambiental;  ARIE - √Årea de Relevante Interesse Ecol√≥gico:  ESEC - Esta√ß√£o Ecol√≥gica;  FLORESTA - Floresta Nacional, Estadual ou Municipal;  MONA - Monumento Natural;  PARQUE - Parque Nacional, Parque Estadual ou Parque Municipal;  RDS - Reserva de Desenvolvimento Sustent√°vel;  REBIO - Reserva Biol√≥gica;  RESEX - Reserva Extrativista;  RFAU - Reserva de Fauna;  RPPN - Reserva Particular do Patrim√¥nio Natural;  RVS - Ref√∫gio de Vida Silvestre.  |
-| 5 | GRUPO4 | tipo | Sigla relativa ao tipo de unidade de conserva√ß√£o. S√£o elas:  PI - prote√ß√£o integral;  US - uso sustent√°vel; |
-| 6 | ESFERA5 | esfera | Jurisdi√ß√£o a qual a UC est√° submetida. S√£o elas: Federal, Municipal e Estadual |
-| 7 | ANO_CRIA6 | ano_criacao | Ano de cria√ß√£o da unidade de conserva√ß√£o |
-| 8 | GID7 | id_original | N√∫mero de identifica√ß√£o gerado na compila√ß√£o dos arquivos shapefiles enviados  pelos √≥rg√£os gestores das UCs. Ele pode ser ignorado,  dado que o n√∫mero mais adequado √© o ID UC ou o CODIGO UC. |
-| 9 | QUALIDAD8 | precisao | Qualidade do dado georreferenciado dos limites da UC cadastrado pelo √ìrg√£o Gestor.  Sendo eles:  Correto (O pol√≠gono corresponde ao memorial descritivo do ato legal de cria√ß√£o);  Aproximado (O pol√≠gono representa uma estimativa dos limites da unidade);  Esquem√°tico (O pol√≠gono √© uma representa√ß√£o esquem√°tica da dimens√£o da unidade) |
-| 10 | ATO_LEGA9 | ato_legal | Ato de cria√ß√£o da UC. |
-| 11 | DT_ULTIM10 | ultimo_ato | Data do ato legal com data mais recente que foi cadastrado no CNUC. Como no shapefile s√≥ aparece o ato legal de cria√ß√£o, pode ser necess√°rio  fazer uma consulta ao portal do CNUC caso queira identificar a qual ato a data se refere. |
-| 12 | CODIGO_U11 | id_cnuc | "identidade" da UC no banco de dados do CNUC. Os 4 √∫ltimos d√≠gitos s√£o n√∫meros √∫nicos e correspondem ao ID_UC. |
-| 13 | NOME_ORG12 | orgao_gestor | Nome do √ìrg√£o Gestor, que √© o √≥rg√£o que faz a gest√£o da UC  e que √© respons√°vel pelas informa√ß√µes da mesma no sistema. |
+| 1 | ID_UC0 | id | N˙mero identificador da UC no banco de dados do CNUC |
+| 2 | NOME_UC1 | nome | Nome da Unidade de ConservaÁ„o |
+| 3 | ID_WCMC2 | id_wcmc | N˙mero de identificaÁ„o da UC no banco de dados internacional de ·reas protegidas (WDPA), coordenado pela WCMC (United Nations Environment Programme - World Conservation Monitoring Centre) InformaÁ„o da qualidade dos dados |
+| 4 | CATEGORI3 | categoria | ClassificaÁ„o da UC quanto ‡ categoria segundo o  SNUC (Lei n∫ 9.985/2000). S„o elas: RPPN - Reserva Particular do PatrimÙnio Natural;  APA - ¡rea de ProteÁ„o Ambiental;  ARIE - ¡rea de Relevante Interesse EcolÛgico:  ESEC - EstaÁ„o EcolÛgica;  FLORESTA - Floresta Nacional, Estadual ou Municipal;  MONA - Monumento Natural;  PARQUE - Parque Nacional, Parque Estadual ou Parque Municipal;  RDS - Reserva de Desenvolvimento Sustent·vel;  REBIO - Reserva BiolÛgica;  RESEX - Reserva Extrativista;  RFAU - Reserva de Fauna;  RPPN - Reserva Particular do PatrimÙnio Natural;  RVS - Ref˙gio de Vida Silvestre.  |
+| 5 | GRUPO4 | tipo | Sigla relativa ao tipo de unidade de conservaÁ„o. S„o elas:  PI - proteÁ„o integral;  US - uso sustent·vel; |
+| 6 | ESFERA5 | esfera | JurisdiÁ„o a qual a UC est· submetida. S„o elas: Federal, Municipal e Estadual |
+| 7 | ANO_CRIA6 | ano_criacao | Ano de criaÁ„o da unidade de conservaÁ„o |
+| 8 | GID7 | id_original | N˙mero de identificaÁ„o gerado na compilaÁ„o dos arquivos shapefiles enviados  pelos Ûrg„os gestores das UCs. Ele pode ser ignorado,  dado que o n˙mero mais adequado È o ID UC ou o CODIGO UC. |
+| 9 | QUALIDAD8 | precisao | Qualidade do dado georreferenciado dos limites da UC cadastrado pelo ”rg„o Gestor.  Sendo eles:  Correto (O polÌgono corresponde ao memorial descritivo do ato legal de criaÁ„o);  Aproximado (O polÌgono representa uma estimativa dos limites da unidade);  Esquem·tico (O polÌgono È uma representaÁ„o esquem·tica da dimens„o da unidade) |
+| 10 | ATO_LEGA9 | ato_legal | Ato de criaÁ„o da UC. |
+| 11 | DT_ULTIM10 | ultimo_ato | Data do ato legal com data mais recente que foi cadastrado no CNUC. Como no shapefile sÛ aparece o ato legal de criaÁ„o, pode ser necess·rio  fazer uma consulta ao portal do CNUC caso queira identificar a qual ato a data se refere. |
+| 12 | CODIGO_U11 | id_cnuc | "identidade" da UC no banco de dados do CNUC. Os 4 ˙ltimos dÌgitos s„o n˙meros ˙nicos e correspondem ao ID_UC. |
+| 13 | NOME_ORG12 | orgao_gestor | Nome do ”rg„o Gestor, que È o Ûrg„o que faz a gest„o da UC  e que È respons·vel pelas informaÁıes da mesma no sistema. |
+
+
+
+
+
 
 
 
