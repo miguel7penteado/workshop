@@ -6,6 +6,7 @@
 ## 2019/09/11
 
 ## - Manhã:
+[http://miguel7penteado.github.io/workshop/](http://miguel7penteado.github.io/workshop/)
 
 ## - Tarde: Mão na Massa
 ### Perparo inicial:
