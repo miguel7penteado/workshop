@@ -1,0 +1,1318 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Limpeza dos Dados · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="aplicacao_de_regras_de_consistencia.html" />
+    
+    
+    <link rel="prev" href="importacao.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introdução
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.1" data-path="../autores.html">
+            
+                <a href="../autores.html">
+            
+                    
+                    Autores
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.2" data-path="../fontes_de_dados_governamentais.html">
+            
+                <a href="../fontes_de_dados_governamentais.html">
+            
+                    
+                    Natureza dos Dados Governamentais
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.3" data-path="../o_ibge.html">
+            
+                <a href="../o_ibge.html">
+            
+                    
+                    O IBGE
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.4" data-path="../pesquisas_do_ibge.html">
+            
+                <a href="../pesquisas_do_ibge.html">
+            
+                    
+                    Pesquisas do IBGE - Informação ou Dado
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.5" data-path="../repositorios_do_ibge.html">
+            
+                <a href="../repositorios_do_ibge.html">
+            
+                    
+                    Repositórios do IBGE
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1.5.1" data-path="../plano_de_dados_abertos.html">
+            
+                <a href="../plano_de_dados_abertos.html">
+            
+                    
+                    Plano de Dados Abertos 
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.5.2" data-path="../repositorio_de_informacoes.html">
+            
+                <a href="../repositorio_de_informacoes.html">
+            
+                    
+                    Repositório de Informações
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.1.5.3" data-path="../repositorio_de_dados.html">
+            
+                <a href="../repositorio_de_dados.html">
+            
+                    
+                    Repositório de Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../capitulo1_-_pre-requisitos/">
+            
+                <a href="../capitulo1_-_pre-requisitos/">
+            
+                    
+                    Pré-Requisitos
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../capitulo1_-_pre-requisitos/postgresql.html">
+            
+                <a href="../capitulo1_-_pre-requisitos/postgresql.html">
+            
+                    
+                    Softwares
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1.1" data-path="../capitulo1_-_pre-requisitos/postgres">
+            
+                <span>
+            
+                    
+                    Postgres
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.1.2" data-path="../capitulo1_-_pre-requisitos/qgis">
+            
+                <span>
+            
+                    
+                    QGIS
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.1.3" data-path="../capitulo1_-_pre-requisitos/rstudio">
+            
+                <span>
+            
+                    
+                    RStudio
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../capitulo1_-_pre-requisitos/linguagens_de_programacao.html">
+            
+                <a href="../capitulo1_-_pre-requisitos/linguagens_de_programacao.html">
+            
+                    
+                    Linguagens de Programação
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.2.1" data-path="../capitulo1_-_pre-requisitos/python">
+            
+                <span>
+            
+                    
+                    Python
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.2" data-path="../capitulo1_-_pre-requisitos/r">
+            
+                <span>
+            
+                    
+                    R
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2.3" data-path="../capitulo1_-_pre-requisitos/sql.html">
+            
+                <a href="../capitulo1_-_pre-requisitos/sql.html">
+            
+                    
+                    SQL espacial
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../datasets/">
+            
+                <a href="../datasets/">
+            
+                    
+                    Datasets
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../datasets/malhas_espaciais">
+            
+                <span>
+            
+                    
+                    Malhas Espaciais
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="../datasets/microdados_estatisticos">
+            
+                <span>
+            
+                    
+                    Microdados Estatísticos
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="../datasets/imagens_georreferenciadas">
+            
+                <span>
+            
+                    
+                    Imagens Georreferênciadas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Materiais e Métodos
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="estruturando_o_banco_de_dados.html">
+            
+                <a href="estruturando_o_banco_de_dados.html">
+            
+                    
+                    Estruturando o Banco de Dados
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1.1" data-path="gerando_usuarios.html">
+            
+                <a href="gerando_usuarios.html">
+            
+                    
+                    Gerando usuários no servidor Postgres
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.1.2" data-path="criando_o_banco_de_dados.html">
+            
+                <a href="criando_o_banco_de_dados.html">
+            
+                    
+                    Criando o Banco de Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.1.3" data-path="gerando_esquemas_no_servidor_postgres.html">
+            
+                <a href="gerando_esquemas_no_servidor_postgres.html">
+            
+                    
+                    Organizando: gerando esquemas no banco de dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="importando_os_datasets_de_malhas_geograficas.html">
+            
+                <a href="importando_os_datasets_de_malhas_geograficas.html">
+            
+                    
+                    Importando os Datasets de Malhas Geográficas
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.1" data-path="malha_geografica_das_unidades_da_federacao.html">
+            
+                <a href="malha_geografica_das_unidades_da_federacao.html">
+            
+                    
+                    Malha geográfica das Unidades da Federação
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.1.1" data-path="importacao.html">
+            
+                <a href="importacao.html">
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.2.1.2" data-path="limpeza_dos_dados.html">
+            
+                <a href="limpeza_dos_dados.html">
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.1.3" data-path="aplicacao_de_regras_de_consistencia.html">
+            
+                <a href="aplicacao_de_regras_de_consistencia.html">
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.2" data-path="malha_geografica_dos_municipios_brasileiros">
+            
+                <span>
+            
+                    
+                    Malha Geográfica dos Municípios Brasileiros
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.2.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.2.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.2.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.3" data-path="malha_geografica_dos_distritos_municipais_brasileiros.html">
+            
+                <a href="malha_geografica_dos_distritos_municipais_brasileiros.html">
+            
+                    
+                    Malha Geográfica dos Distritos Municipais Brasileiros
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.3.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.3.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.3.3" data-path="aplicacao_de_regras_de_consitencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consitência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.4" data-path="malha_geografica_dos_subdistritos_municipais_brasileiros">
+            
+                <span>
+            
+                    
+                    Malha Geográfica dos Subdistritos Municipais Brasileiros
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.4.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.4.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.4.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.5" data-path="malha_geografica_dos_setores_censitarios">
+            
+                <span>
+            
+                    
+                    Malha Geográfica dos Setores Censitários
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.5.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.5.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.5.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.6" data-path="malha_de_quadra-face_e_logradouros">
+            
+                <span>
+            
+                    
+                    Malha de Quadra-Face e Logradouros
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.6.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.6.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.6.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.7" data-path="geracao_da_malha_de_areas_de_ponderacao_gerar_ou_baixar.html">
+            
+                <a href="geracao_da_malha_de_areas_de_ponderacao_gerar_ou_baixar.html">
+            
+                    
+                    Geração da malha de Áreas de Ponderação: Gerar ou Baixar ?
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.7.1" data-path="a_malha_de_areas_de_ponderacao_do_site_ibge_censo_2010">
+            
+                <span>
+            
+                    
+                    A Malha de Áreas de Ponderação do site IBGE CENSO 2010
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.7.2" data-path="gerando_a_minha_malha_de_areas_de_ponderacao_-_setores_sao_a_chave">
+            
+                <span>
+            
+                    
+                    Gerando a minha Malha de Áreas de Ponderação - Setores são a chave !
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.7.3" data-path="o_que_trazer_de_dados_dos_setores_agregados__a_opcao_e_sua">
+            
+                <span>
+            
+                    
+                    O que trazer de dados dos setores agregados ? A opção é sua.
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.7.4" data-path="aplicacao_de_regras_de_consitencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consitência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.8" data-path="malha_geografica_do_cnuc_-_cadastro_nacional_de_unidades_de_conservacao">
+            
+                <span>
+            
+                    
+                    Malha Geográfica do CNUC - Cadastro Nacional de Unidades de Conservação
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.8.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.8.2" data-path="limpeza_de_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.8.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.9" data-path="malha_geografica_das_reservas_da_funai">
+            
+                <span>
+            
+                    
+                    Malha geográfica das Reservas da FUNAI
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.2.9.1" data-path="importacao">
+            
+                <span>
+            
+                    
+                    Importação
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.9.2" data-path="limpeza_dos_dados">
+            
+                <span>
+            
+                    
+                    Limpeza dos Dados
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2.9.3" data-path="aplicacao_de_regras_de_consistencia">
+            
+                <span>
+            
+                    
+                    Aplicação de Regras de Consistência
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="importando_os_datasets_de_microdados.html">
+            
+                <a href="importando_os_datasets_de_microdados.html">
+            
+                    
+                    Importando os Datasets de Microdados
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.3.1" data-path="censo_2010_-_microdados_da_amostra_-_domicilios">
+            
+                <span>
+            
+                    
+                    CENSO 2010 - Microdados da Amostra - Tema Domicílios
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3.2" data-path="censo_2010_-_microdados_da_amostra_-_pessoas.html">
+            
+                <a href="censo_2010_-_microdados_da_amostra_-_pessoas.html">
+            
+                    
+                    CENSO 2010 - Microdados da Amostra - Tema Pessoas
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3.3" data-path="censo_2010_-_microdados_da_amostra_-_imigracao.html">
+            
+                <a href="censo_2010_-_microdados_da_amostra_-_imigracao.html">
+            
+                    
+                    CENSO 2010 - Microdados da Amostra - Tema Imigração
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3.4" data-path="censo_2010_-_microdados_da_amostra_-_mortalidade">
+            
+                <span>
+            
+                    
+                    CENSO 2010 - Microdados da Amostra - Tema Mortalidade
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3.5" data-path="censo_2010_-_agregados_por_setor">
+            
+                <span>
+            
+                    
+                    CENSO 2010 - Agregados por Setor
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3.6" data-path="cnefe_-_cadastro_nacional_de_enderecos_para_fins_estatisticos">
+            
+                <span>
+            
+                    
+                    CNEFE - Cadastro Nacional de Endereços para Fins Estatísticos
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="associando_microdados_e_malhas_geograficas">
+            
+                <span>
+            
+                    
+                    Associando Microdados e Malhas Geográficas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Limpeza dos Dados</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="limpeza-dos-dados">Limpeza dos Dados</h1>
+<ul>
+<li>Transformar o c&#xF3;digo de texto para n&#xFA;mero inteiro</li>
+<li>Criar uma coluna formadata chamada <code>geoc&#xF3;digo</code></li>
+<li>Gerar uma tabela neste novo formato</li>
+</ul>
+<pre><code class="lang-sql"><span class="hljs-comment">-- caso exista uma tabela formatada anteriormente, apague</span>
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">EXISTS</span> <span class="hljs-string">&quot;microdados.amostra.domicilios.censo2010&quot;</span>.censo2010estados;
+
+<span class="hljs-comment">-- crie uma consulta formatada e salve com o nome da tabela formatada</span>
+<span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;microdados.amostra.domicilios.censo2010&quot;</span>.censo2010estados1 ;
+<span class="hljs-keyword">SELECT</span>
+<span class="hljs-keyword">CAST</span>( ST_Transform(c.geom,<span class="hljs-number">4674</span>)                        <span class="hljs-keyword">AS</span> geometry(MultiPolygon,<span class="hljs-number">4674</span>) ) <span class="hljs-keyword">AS</span> geom,
+<span class="hljs-keyword">CAST</span>(     <span class="hljs-keyword">coalesce</span>(c.cd_geocodu || <span class="hljs-string">&apos;00000000000&apos;</span>, <span class="hljs-string">&apos;0&apos;</span>) <span class="hljs-keyword">AS</span> <span class="hljs-built_in">bigint</span>                      ) <span class="hljs-keyword">as</span> codigo,
+<span class="hljs-keyword">CAST</span>(
+(
+    <span class="hljs-keyword">SUBSTRING</span>(c.cd_geocodu,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>) || <span class="hljs-comment">-- DF</span>
+    <span class="hljs-string">&apos;-&apos;</span> ||
+    <span class="hljs-string">&apos;00000&apos;</span> <span class="hljs-comment">--SUBSTRING(c.cd_geocuf,3,5) || -- Municipio</span>
+    <span class="hljs-string">&apos;-&apos;</span> ||
+    <span class="hljs-string">&apos;00&apos;</span>    <span class="hljs-comment">--SUBSTRING(c.cd_geocuf,8,2) || -- Distrito</span>
+    <span class="hljs-string">&apos;-&apos;</span> ||
+    <span class="hljs-string">&apos;00&apos;</span>    <span class="hljs-comment">--SUBSTRING(c.cd_geocodd,10,2) || -- SubDistrito</span>
+    <span class="hljs-string">&apos;-&apos;</span> ||
+    <span class="hljs-string">&apos;00&apos;</span>    <span class="hljs-comment">--SUBSTRING(c.cd_geocodd,12,2) -- ponderacao</span>
+)
+<span class="hljs-keyword">AS</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">17</span>)
+)
+                                                              <span class="hljs-keyword">as</span> geocodigo,
+<span class="hljs-keyword">CAST</span>(<span class="hljs-keyword">SUBSTRING</span>(c.cd_geocodu,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>) <span class="hljs-keyword">AS</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">2</span>))               <span class="hljs-keyword">as</span> estado,
+<span class="hljs-keyword">CAST</span>(<span class="hljs-string">&apos;00000&apos;</span>                    <span class="hljs-keyword">as</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">5</span>))                <span class="hljs-keyword">as</span> municipio,
+<span class="hljs-keyword">CAST</span>(<span class="hljs-string">&apos;00&apos;</span>                       <span class="hljs-keyword">as</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">2</span>))                <span class="hljs-keyword">as</span> distrito,
+<span class="hljs-keyword">CAST</span>(<span class="hljs-string">&apos;00&apos;</span>                       <span class="hljs-keyword">as</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">2</span>))                <span class="hljs-keyword">as</span> subdistrito,
+<span class="hljs-keyword">CAST</span>(<span class="hljs-string">&apos;00&apos;</span>                       <span class="hljs-keyword">as</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">2</span>))                <span class="hljs-keyword">as</span> area_ponderacao, <span class="hljs-comment">--SUBSTRING(c.geocodigo,12,2) as area_ponderacao,</span>
+<span class="hljs-keyword">lower</span>(nm_estado)                                              <span class="hljs-keyword">as</span> nome,
+<span class="hljs-keyword">lower</span>(nm_regiao)                                              <span class="hljs-keyword">as</span> regiao
+<span class="hljs-keyword">into</span> <span class="hljs-string">&quot;microdados.amostra.domicilios.censo2010&quot;</span>.censo2010estados
+<span class="hljs-keyword">from</span> <span class="hljs-string">&quot;microdados.amostra.domicilios.censo2010&quot;</span>.censo2010estados1 <span class="hljs-keyword">as</span> c ;
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="importacao.html" class="navigation navigation-prev " aria-label="Previous page: Importação">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="aplicacao_de_regras_de_consistencia.html" class="navigation navigation-next " aria-label="Next page: Aplicação de Regras de Consistência">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Limpeza dos Dados","level":"1.4.2.1.2","depth":4,"next":{"title":"Aplicação de Regras de Consistência","level":"1.4.2.1.3","depth":4,"path":"materiais_e_metodos/aplicacao_de_regras_de_consistencia.md","ref":"materiais_e_metodos/aplicacao_de_regras_de_consistencia.md","articles":[]},"previous":{"title":"Importação","level":"1.4.2.1.1","depth":4,"path":"materiais_e_metodos/importacao.md","ref":"materiais_e_metodos/importacao.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"materiais_e_metodos/limpeza_dos_dados.md","mtime":"2020-07-23T07:50:24.584Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-07-23T07:51:10.521Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
